@@ -2,7 +2,7 @@
 
 A modular security SDK built to sit inside the Solana wallet signing pipeline — not alongside it.
 
-Shell intercepts transactions before they reach the blockchain, runs heuristic and on-chain checks on the destination and contract details, and blocks malicious activity silently in the background. It is designed to be embedded directly into wallet clients like Phantom, Solflare, and Backpack — not installed as a separate extension.
+Shell intercepts transactions before they reach the blockchain, runs heuristic and AI-assisted scans on the destination and contract details, and blocks malicious activity silently in the background. It is designed to be embedded directly into wallet clients like Phantom, Solflare, and Backpack — not installed as a separate extension.
 
 This repository contains the **Interactive Shell SDK Sandbox**: a developer environment for simulating attack scenarios and visualizing how Shell's security hooks behave inside a real signing flow.
 
@@ -20,9 +20,8 @@ This repository contains the **Interactive Shell SDK Sandbox**: a developer envi
          │  intercept hook
          ▼
  ┌───────────────┐
- │   Shell SDK   │ ──► Heuristic Scanner (mimic addresses, visual lookalikes)
- └───────┬───────┘ ──► Solana RPC (account age, zero-history, program checks)
-         │         ──► Dynamic User State (Away Mode)
+ │   Shell SDK   │ ──► Heuristic Scanner (mimic addresses, malicious links)
+ └───────┬───────┘ ──► Dynamic User State (Away Mode check)
          │         ──► Rule Engine (PIN escalation above SOL threshold)
          ▼
 [User Authorization — Sign / Reject]
@@ -34,15 +33,11 @@ Shell plugs into the wallet's pre-flight transaction handler. Before any signatu
 
 ### Away Mode
 
-When a user enables Away Mode, Shell sets a local state flag. Any background signing request — from rogue browser extensions or silent script-injection attacks — is blocked before reaching the confirmation screen. State lives in memory only — nothing is persisted or sent to a server.
+When a user enables Away Mode, Shell sets a local state flag. Any background signing request — from rogue browser extensions or silent script-injection attacks — is blocked before reaching the confirmation screen.
 
 ### Mimic address detection
 
-Shell runs local heuristic matching against the wallet's contact list to catch **mimic addresses**: addresses engineered to share the first and last characters of a known safe address. A visual normalization filter also catches lookalike character substitutions (e.g. `AiiC` matching `AliC`).
-
-### On-chain verification
-
-Shell queries the Solana mainnet RPC directly to check destination accounts for zero transaction history and program account flags — two signals that don't require any external AI or third-party service.
+Shell runs local regex-based matching against the user's contact list to catch **mimic addresses**: addresses engineered to share the first and last characters of a known safe address. Flagged transactions are proxied to a server-side intelligence filter for deeper inspection.
 
 ### PIN escalation
 
@@ -52,7 +47,7 @@ Transfers above a configurable SOL threshold to unverified addresses trigger an 
 
 ## Sandbox scenarios
 
-The sandbox ships with four pre-loaded simulations, each wired to the real Shell SDK:
+The sandbox ships with four pre-loaded simulations:
 
 | Scenario | Attack type | Shell response |
 |---|---|---|
@@ -66,28 +61,15 @@ The sandbox ships with four pre-loaded simulations, each wired to the real Shell
 ## Setup
 
 ```bash
-git clone https://github.com/zarkbns/shell.git
+git clone https://github.com/yourusername/shell.git
 cd shell
 npm install
+cp .env.example .env        # add GEMINI_API_KEY for AI scanner (optional)
 npm run dev
-```
-
----
-
-## Architecture
-
-```
-src/
-└── lib/
-    ├── shell.ts          # SDK entry point — ShellSDK class
-    ├── heuristics.ts     # Local risk engine + visual normalization
-    ├── solanaRpc.ts      # On-chain account verification
-    └── awayMode.ts       # In-memory away state controller
-server.ts                 # Express + Vite dev server
 ```
 
 ---
 
 ## Design scope
 
-Shell is a feature layer, not a standalone product. It has no separate UI surface, no system tray, no notification stream. It runs inside the wallet client and surfaces only when it has something to block or escalate. Wallet engineering teams integrate it into their existing client-side architecture by importing `ShellSDK` and calling `analyzeTransaction()` inside their signing handler.
+Shell is a feature layer, not a standalone product. It has no separate UI surface, no system tray, no notification stream. It runs inside the wallet client and surfaces only when it has something to block or escalate. Wallet engineering teams integrate it into their existing client-side architecture via the SDK hooks documented in `/docs`.

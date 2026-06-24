@@ -1,5 +1,6 @@
 import { isAwayModeActive, setAwayMode } from "./awayMode";
 import { analyzeAddress, AnalysisResult } from "./heuristics";
+import { decodeTransaction } from "./transactionDecoder";
 
 export interface ShellSDKConfig {
   contactList: string[];
@@ -21,6 +22,35 @@ export class ShellSDK {
   init(config: ShellSDKConfig): void {
     this.contactList = config.contactList || [];
     this.solThreshold = config.solThreshold !== undefined ? config.solThreshold : 10;
+  }
+
+  async decodeAndAnalyze(params: {
+    serializedTransaction: string;
+    encoding: "base64" | "base58";
+    transferAmount: number;
+    contactList: string[];
+  }) {
+    // Set the contactList so that analyzeTransaction can access it
+    this.contactList = params.contactList || [];
+
+    const transactionResult = await decodeTransaction({
+      serializedTransaction: params.serializedTransaction,
+      encoding: params.encoding
+    });
+
+    // Extract the destination address from instructions[0].accounts[1] safely
+    const address = transactionResult.instructions?.[0]?.accounts?.[1] || "";
+
+    const analysisResult = await this.analyzeTransaction({
+      address,
+      transferAmount: params.transferAmount,
+      transactionType: "Direct Transfer" // Defaulting transaction type for analyzed target
+    });
+
+    return {
+      ...transactionResult,
+      ...analysisResult
+    };
   }
 
   async analyzeTransaction(params: {

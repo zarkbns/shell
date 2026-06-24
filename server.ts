@@ -70,6 +70,38 @@ app.get("/api/away-mode/status", (req, res) => {
   res.json({ success: true, active: shell.getAwayModeStatus() });
 });
 
+// New endpoint for Solana transaction decoding and analysis
+app.post("/api/decode-transaction", async (req, res) => {
+  const { serializedTransaction, encoding, transferAmount, contactList } = req.body;
+
+  if (!serializedTransaction || typeof serializedTransaction !== "string") {
+    return res.status(400).json({ error: "serializedTransaction is required and must be a string." });
+  }
+
+  const enc = encoding === "base58" ? "base58" : "base64";
+  const amount = typeof transferAmount === "number" ? transferAmount : parseFloat(transferAmount) || 0;
+  const contacts = Array.isArray(contactList) ? contactList : [];
+
+  try {
+    const result = await shell.decodeAndAnalyze({
+      serializedTransaction,
+      encoding: enc,
+      transferAmount: amount,
+      contactList: contacts
+    });
+
+    return res.json({
+      success: true,
+      ...result
+    });
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      error: err instanceof Error ? err.message : String(err)
+    });
+  }
+});
+
 // Configure Vite or Static Files
 async function configureViteAndStatic() {
   if (process.env.NODE_ENV !== "production") {
