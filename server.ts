@@ -56,6 +56,20 @@ app.post("/api/analyze-address", async (req, res) => {
   });
 });
 
+app.get("/api/away-mode/activate", (req, res) => {
+  shell.setAwayMode(true);
+  res.json({ success: true, active: shell.getAwayModeStatus() });
+});
+
+app.get("/api/away-mode/deactivate", (req, res) => {
+  shell.setAwayMode(false);
+  res.json({ success: true, active: shell.getAwayModeStatus() });
+});
+
+app.get("/api/away-mode/status", (req, res) => {
+  res.json({ success: true, active: shell.getAwayModeStatus() });
+});
+
 // Configure Vite or Static Files
 async function configureViteAndStatic() {
   if (process.env.NODE_ENV !== "production") {

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Shield,
   ShieldCheck,
@@ -60,9 +60,9 @@ const SANDBOX_SCENARIOS: SandboxScenario[] = [
     id: 'airdrop',
     name: 'Claim "Free Airdrop"',
     attackType: 'Deceptive contract-approval drain',
-    recipient: 'TokenClaimRewardsProgram1111111111111111',
+    recipient: 'Dr4x..evil1',
     amount: '0.0',
-    memo: 'Program: DelegateAuthority { amount: Max_Uint64 }',
+    memo: 'Contract Approval',
     description: 'Simulates clicking a "Claim" button on a scam page requesting full account delegate permissions.',
     responseSummary: 'Shell SDK intercepts the pre-flight transaction, decodes the instruction payload, identifies the unauthorized high-risk authority delegate request, and rejects signing.'
   },
@@ -70,9 +70,9 @@ const SANDBOX_SCENARIOS: SandboxScenario[] = [
     id: 'mimic',
     name: 'Mimic Address Trap',
     attackType: 'Poisoned address (matches Alice\'s first/last chars)',
-    recipient: 'Alice77FakeMimicAddressPoison7R8S',
-    amount: '12.0',
-    memo: 'Transfer SOL',
+    recipient: 'AiiC3...xK9z',
+    amount: '2.0',
+    memo: 'Direct Transfer',
     description: 'Simulates a transfer to a generated address matching Alice\'s start/end characters (Alice...7R8S).',
     responseSummary: 'Shell SDK scans contacts, notices the destination matches Alice\'s first/last letters but is NOT Alice\'s actual verified address, flags it as a copy-paste attack, and blocks it.'
   },
@@ -82,7 +82,7 @@ const SANDBOX_SCENARIOS: SandboxScenario[] = [
     attackType: 'Background transfer while user is Away',
     recipient: 'UnknownMaliciousActorWalletAddress',
     amount: '25.0',
-    memo: 'Transfer SOL (Silent background trigger)',
+    memo: 'Direct Transfer',
     description: 'Simulates a background malware extension attempting a signature dispatch when the user is away.',
     responseSummary: 'Shell SDK checks the active Away Mode state flag in the wallet and blocks all signature dispatches instantly before they can reach the user confirmation stage.'
   },
@@ -92,7 +92,7 @@ const SANDBOX_SCENARIOS: SandboxScenario[] = [
     attackType: 'Normal transfer to verified contact',
     recipient: 'AliceSisterVerifiedWallet7R8S',
     amount: '3.5',
-    memo: 'Gift SOL',
+    memo: 'Direct Transfer',
     description: 'Simulates a routine, safe, direct transfer to your trusted contact Alice.',
     responseSummary: 'Shell SDK matches the recipient against the verified local Trusted Contacts list, bypasses high-value security checks, and immediately signs and routes the transaction.'
   }
@@ -150,8 +150,29 @@ export default function App() {
     }
   ]);
 
-  // Run protection logic
-  const handleInterceptAndCheck = (e: React.FormEvent) => {
+  // Synchronize Away Mode status on mount
+  useEffect(() => {
+    fetch("/api/away-mode/status")
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data.active === "boolean") {
+          setIsAwayModeActive(data.active);
+        }
+      })
+      .catch(err => console.error("Error fetching away mode status:", err));
+  }, []);
+
+  const setAwayModeOnServer = async (active: boolean) => {
+    setIsAwayModeActive(active);
+    try {
+      await fetch(active ? "/api/away-mode/activate" : "/api/away-mode/deactivate");
+    } catch (err) {
+      console.error("Failed to sync away mode with server:", err);
+    }
+  };
+
+  // Run protection logic using real API
+  const handleInterceptAndCheck = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!recipientInput.trim()) return;
 
@@ -159,76 +180,83 @@ export default function App() {
     setPinError('');
     setEnteredPin('');
 
-    setTimeout(() => {
+    try {
       // 1. If shield is turned off completely
       if (!isShieldActive) {
         approveTransaction('Protection disabled. Signature dispatched unprotected.');
         return;
       }
 
-      // 2. Is Away Mode ON? (Checks active state or rogue app attempt scenario)
-      if (isAwayModeActive || activeScenarioId === 'rogue') {
-        if (!isAwayModeActive && activeScenarioId === 'rogue') {
-          // If simulating rogue activity but away mode is OFF
-          approveTransaction('Warning: Transaction signed! Background transaction was allowed because Away Mode is OFF. Turn Away Mode ON to instantly block background activity.');
-          return;
+      // Scenario 3 - Rogue App: Before sending, call GET /api/away-mode/activate to set away mode on
+      if (activeScenarioId === 'rogue') {
+        try {
+          await fetch("/api/away-mode/activate");
+          setIsAwayModeActive(true);
+        } catch (err) {
+          console.error("Failed to activate away mode for rogue scenario:", err);
         }
-        blockTransaction(
-          'Blocked: Device Locked (Away Mode)',
-          'Shell SDK detected active Away Mode flag in wallet. Outbound transaction aborted to stop unauthorized background signing.'
-        );
-        return;
       }
 
-      // 3. Scan for common mock indicators or specific active scenarios
-      const inputLower = recipientInput.toLowerCase();
-      const isDangerousScam = inputLower.includes('scam') || 
-                              inputLower.includes('fake') || 
-                              inputLower.includes('drain') ||
-                              inputLower.includes('reward') ||
-                              inputLower.includes('claim') ||
-                              activeScenarioId === 'airdrop';
-                     
-      const isMimicAttack = inputLower.includes('mimic') || 
-                            inputLower.includes('clone') ||
-                            inputLower.includes('poison') ||
-                            activeScenarioId === 'mimic';
+      // Prepare contact list based on scenario
+      let contactList: string[] = [];
+      if (activeScenarioId === 'mimic') {
+        contactList = ["AliC3...xK9z"];
+      } else if (activeScenarioId === 'sister') {
+        contactList = ["AliceSisterVerifiedWallet7R8S"];
+      } else {
+        contactList = trustedContacts.map(c => c.name);
+      }
 
-      if (scamDetectionEnabled) {
-        if (isDangerousScam) {
+      const res = await fetch("/api/analyze-address", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          address: recipientInput,
+          transferAmount: parseFloat(amountInput) || 0,
+          transactionType: txNote || "Direct Transfer",
+          contactList
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("API call failed");
+      }
+
+      const data = await res.json();
+      if (data.success && data.analysis) {
+        const { riskScore, category, explanation, recommendation } = data.analysis;
+
+        // If riskScore >= 85, block transaction
+        if (riskScore >= 85) {
           blockTransaction(
-            'Blocked: High-Risk Permission Scope',
-            'Shell SDK decoded the instruction payload and flagged high-risk permission delegate requests (DelegateAuthority). Signing rejected to prevent token drain.'
+            category || 'Blocked: Threat Detected',
+            explanation || 'Risk assessment limit exceeded. Transaction aborted.'
           );
-          return;
+        } else {
+          // Check if PIN is required for high-value transfer (e.g. amount > 10 SOL and riskScore > 20)
+          const amount = parseFloat(amountInput) || 0;
+          const isWhitelisted = activeScenarioId === 'sister' || trustedContacts.some(c => recipientInput.includes(c.name));
+
+          if (isPinRequired && amount > transferLimit && !isWhitelisted) {
+            setPipelineState('pin-required');
+            setCustomExplanation(`This transfer of ${amount} SOL exceeds the configured single-transaction limit of ${transferLimit} SOL to unverified addresses. Physical PIN authentication required.`);
+          } else {
+            approveTransaction(
+              isWhitelisted 
+                ? 'Safe transaction: Recipient is a trusted verified contact. Intercept cleared.'
+                : explanation || 'Verified Safe Transfer completed successfully.'
+            );
+          }
         }
-
-        if (isMimicAttack) {
-          blockTransaction(
-            'Blocked: Mimic Address Mismatch',
-            'Warning: Destination matches Alice\'s first and last characters (Alice...7R8S) but has a mismatched middle sequence. This is a copy-paste poisoning attempt.'
-          );
-          return;
-        }
+      } else {
+        throw new Error("Invalid response format");
       }
-
-      // 4. Require PIN for high-value transfers
-      const amount = parseFloat(amountInput) || 0;
-      const isWhitelisted = trustedContacts.some(c => recipientInput.includes(c.name)) || activeScenarioId === 'sister';
-
-      if (isPinRequired && amount > transferLimit && !isWhitelisted) {
-        setPipelineState('pin-required');
-        setCustomExplanation(`This transfer of ${amount} SOL exceeds the configured single-transaction limit of ${transferLimit} SOL to unverified addresses. Physical PIN authentication required.`);
-        return;
-      }
-
-      // Safe transfer
-      approveTransaction(
-        isWhitelisted 
-          ? 'Safe transaction: Recipient is a trusted verified contact. Intercept cleared.'
-          : 'Verified Safe Transfer completed successfully.'
-      );
-    }, 1200);
+    } catch (err) {
+      console.error("API error during security check:", err);
+      blockTransaction('Scanning Error', 'Failed to communicate with Shell SDK backend protector.');
+    }
   };
 
   const blockTransaction = (title: string, msg: string) => {
@@ -440,7 +468,7 @@ export default function App() {
             <span className="text-[#EEE5BC]/90 font-medium">Instant Lockout Status:</span>
             <div className="flex rounded-lg bg-slate-950 p-0.5 border border-[#3A3230]">
               <button
-                onClick={() => setIsAwayModeActive(false)}
+                onClick={() => setAwayModeOnServer(false)}
                 className={`px-3 py-1 rounded-md font-bold transition-all flex items-center gap-1.5 text-xs ${
                   !isAwayModeActive
                     ? 'bg-[#4289CB] text-white shadow-md'
@@ -451,7 +479,7 @@ export default function App() {
                 <Unlock className="w-3.5 h-3.5" /> I'm Active
               </button>
               <button
-                onClick={() => setIsAwayModeActive(true)}
+                onClick={() => setAwayModeOnServer(true)}
                 className={`px-3 py-1 rounded-md font-bold transition-all flex items-center gap-1.5 text-xs ${
                   isAwayModeActive
                     ? 'bg-[#EEE5BC] text-slate-950 shadow-md'

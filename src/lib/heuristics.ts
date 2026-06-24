@@ -68,6 +68,12 @@ export const SIMULATED_THREAT_DATABASE: Record<string, Omit<AnalysisResult, 'sou
   }
 };
 
+function normalizeVisuals(str: string): string {
+  return str.toLowerCase()
+    .replace(/[il1|]/g, "l")
+    .replace(/[o0]/g, "o");
+}
+
 export async function analyzeAddress(params: AnalysisParams): Promise<AnalysisResult> {
   const { address, transferAmount, transactionType, contactList } = params;
 
@@ -94,14 +100,14 @@ export async function analyzeAddress(params: AnalysisParams): Promise<AnalysisRe
 
   // b. Does it match first 4 + last 4 chars of any contact? → riskScore 85, mimic warning
   if (cleanAddress.length >= 8) {
-    const addressPrefix = cleanAddress.substring(0, 4).toLowerCase();
-    const addressSuffix = cleanAddress.substring(cleanAddress.length - 4).toLowerCase();
+    const addressPrefixNorm = normalizeVisuals(cleanAddress.substring(0, 4));
+    const addressSuffixNorm = normalizeVisuals(cleanAddress.substring(cleanAddress.length - 4));
 
     const mimicMatch = cleanContacts.find(contact => {
       if (contact.length < 8) return false;
-      const contactPrefix = contact.substring(0, 4).toLowerCase();
-      const contactSuffix = contact.substring(contact.length - 4).toLowerCase();
-      return contactPrefix === addressPrefix && contactSuffix === addressSuffix;
+      const contactPrefixNorm = normalizeVisuals(contact.substring(0, 4));
+      const contactSuffixNorm = normalizeVisuals(contact.substring(contact.length - 4));
+      return contactPrefixNorm === addressPrefixNorm && contactSuffixNorm === addressSuffixNorm;
     });
 
     if (mimicMatch) {
@@ -113,7 +119,7 @@ export async function analyzeAddress(params: AnalysisParams): Promise<AnalysisRe
           "Not in your verified contacts list",
           "Potential copy-paste poison attack detected"
         ],
-        explanation: `This address is not in your contact list, but its prefix and suffix are identical to your contact (${mimicMatch.substring(0, 4)}...${mimicMatch.substring(mimicMatch.length - 4)}). Scam bots frequently broadcast tiny transfers to trick users into copying this lookalike address from their transaction history.`,
+        explanation: `This address is not in your contact list, but its prefix and suffix are visually identical to your contact (${mimicMatch.substring(0, 4)}...${mimicMatch.substring(mimicMatch.length - 4)}). Scam bots frequently broadcast tiny transfers to trick users into copying this lookalike address from their transaction history.`,
         recommendation: `DO NOT COPY. Manually inspect the full address middle characters. Re-verify with the recipient directly.`,
         recipientReputation: "Warning: Mimicking Lookalike Address",
         source: "local-heuristic"
