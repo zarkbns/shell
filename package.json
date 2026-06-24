@@ -1,11 +1,25 @@
 {
-  "name": "react-example",
-  "private": true,
-  "version": "0.0.0",
+  "name": "shell-sdk",
+  "version": "0.1.0",
+  "description": "Modular transaction security SDK for Solana wallets",
+  "license": "MIT",
+  "keywords": [
+    "solana",
+    "wallet",
+    "security",
+    "sdk",
+    "web3"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "build:sdk": "tsc --outDir dist --declaration true --emitDeclarationOnly false",
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit"

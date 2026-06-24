@@ -1,18 +1,11 @@
 import { Transaction, Connection, PublicKey } from "@solana/web3.js";
 import bs58 from "bs58";
+import { DecodedTransaction } from "./types";
 
 export interface DecodedInstruction {
   programId: string;
   accounts: string[];
   dataLength: number;
-}
-
-export interface DecodedTransactionResult {
-  instructions: DecodedInstruction[];
-  simulationLogs: string[];
-  estimatedFee: number | null;
-  containsUnknownPrograms: boolean;
-  warning: string | null;
 }
 
 const KNOWN_SAFE_PROGRAMS = new Set([
@@ -24,7 +17,7 @@ const KNOWN_SAFE_PROGRAMS = new Set([
 export async function decodeTransaction(params: {
   serializedTransaction: string;
   encoding: "base64" | "base58";
-}): Promise<DecodedTransactionResult> {
+}): Promise<DecodedTransaction> {
   const { serializedTransaction, encoding } = params;
   let warning: string | null = null;
   let instructions: DecodedInstruction[] = [];

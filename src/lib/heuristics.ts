@@ -1,14 +1,5 @@
 import { fetchAccountInfo } from "./solanaRpc";
-
-export interface AnalysisResult {
-  riskScore: number;
-  category: string;
-  indicators: string[];
-  explanation: string;
-  recommendation: string;
-  recipientReputation: string;
-  source: "local-heuristic";
-}
+import { AnalysisResult } from "./types";
 
 export interface AnalysisParams {
   address: string;
@@ -17,7 +8,14 @@ export interface AnalysisParams {
   contactList: string[];
 }
 
-export const SIMULATED_THREAT_DATABASE: Record<string, Omit<AnalysisResult, 'source'>> = {
+export const SIMULATED_THREAT_DATABASE: Record<string, {
+  riskScore: number;
+  category: string;
+  indicators: string[];
+  explanation: string;
+  recommendation: string;
+  recipientReputation: string;
+}> = {
   "Dra1n7pG9KzUq9L9K65gCj2A8W3H4N5M6Q7R8S9T123": {
     riskScore: 98,
     category: "Drainer Contract Call",
@@ -84,6 +82,8 @@ export async function analyzeAddress(params: AnalysisParams): Promise<AnalysisRe
   // a. Is the address in the contactList? → riskScore 2, safe
   if (cleanContacts.includes(cleanAddress)) {
     return {
+      blocked: false,
+      requiresPIN: false,
       riskScore: 2,
       category: "Safe Verified Contact",
       indicators: [
@@ -112,6 +112,8 @@ export async function analyzeAddress(params: AnalysisParams): Promise<AnalysisRe
 
     if (mimicMatch) {
       return {
+        blocked: false,
+        requiresPIN: false,
         riskScore: 85,
         category: "Mimic Address Warning",
         indicators: [
@@ -130,6 +132,8 @@ export async function analyzeAddress(params: AnalysisParams): Promise<AnalysisRe
   // c. Is address length outside 32-44 characters? → riskScore 95, invalid
   if (cleanAddress.length < 32 || cleanAddress.length > 44) {
     return {
+      blocked: false,
+      requiresPIN: false,
       riskScore: 95,
       category: "Invalid Format",
       indicators: [
@@ -147,7 +151,14 @@ export async function analyzeAddress(params: AnalysisParams): Promise<AnalysisRe
   if (SIMULATED_THREAT_DATABASE[cleanAddress]) {
     const dbMatch = SIMULATED_THREAT_DATABASE[cleanAddress];
     return {
-      ...dbMatch,
+      blocked: false,
+      requiresPIN: false,
+      riskScore: dbMatch.riskScore,
+      category: dbMatch.category,
+      indicators: dbMatch.indicators,
+      explanation: dbMatch.explanation,
+      recommendation: dbMatch.recommendation,
+      recipientReputation: dbMatch.recipientReputation,
       source: "local-heuristic"
     };
   }
@@ -193,6 +204,8 @@ export async function analyzeAddress(params: AnalysisParams): Promise<AnalysisRe
   }
 
   return {
+    blocked: false,
+    requiresPIN: false,
     riskScore,
     category,
     indicators,

@@ -1,25 +1,13 @@
 import { isAwayModeActive, setAwayMode } from "./awayMode";
-import { analyzeAddress, AnalysisResult } from "./heuristics";
+import { analyzeAddress } from "./heuristics";
 import { decodeTransaction } from "./transactionDecoder";
-
-export interface ShellSDKConfig {
-  contactList: string[];
-  solThreshold: number;
-}
-
-export interface ShellTransactionAnalysis {
-  blocked: boolean;
-  reason?: string;
-  requiresPIN?: boolean;
-  riskScore: number;
-  details?: AnalysisResult;
-}
+import { ShellConfig, AnalysisResult } from "./types";
 
 export class ShellSDK {
   private contactList: string[] = [];
   private solThreshold: number = 10;
 
-  init(config: ShellSDKConfig): void {
+  init(config: ShellConfig): void {
     this.contactList = config.contactList || [];
     this.solThreshold = config.solThreshold !== undefined ? config.solThreshold : 10;
   }
@@ -57,12 +45,19 @@ export class ShellSDK {
     address: string;
     transferAmount: number;
     transactionType: string;
-  }): Promise<ShellTransactionAnalysis> {
+  }): Promise<AnalysisResult> {
     if (isAwayModeActive()) {
       return {
         blocked: true,
+        requiresPIN: false,
+        riskScore: 100,
         reason: "Away Mode is active",
-        riskScore: 100
+        indicators: ["Away Mode is active"],
+        recommendation: "Turn Away Mode off in the top status bar when you are ready to make transfers.",
+        source: "local-heuristic",
+        category: "Blocked: Device Locked (Away Mode)",
+        explanation: "Away Mode is active",
+        recipientReputation: "Blocked"
       };
     }
 
@@ -76,8 +71,15 @@ export class ShellSDK {
     if (result.riskScore >= 85) {
       return {
         blocked: true,
-        reason: result.explanation,
+        requiresPIN: false,
         riskScore: result.riskScore,
+        reason: result.explanation,
+        indicators: result.indicators,
+        recommendation: result.recommendation,
+        source: result.source,
+        category: result.category,
+        explanation: result.explanation,
+        recipientReputation: result.recipientReputation,
         details: result
       };
     }
@@ -87,6 +89,13 @@ export class ShellSDK {
         blocked: false,
         requiresPIN: true,
         riskScore: result.riskScore,
+        reason: result.explanation,
+        indicators: result.indicators,
+        recommendation: result.recommendation,
+        source: result.source,
+        category: result.category,
+        explanation: result.explanation,
+        recipientReputation: result.recipientReputation,
         details: result
       };
     }
@@ -95,6 +104,13 @@ export class ShellSDK {
       blocked: false,
       requiresPIN: false,
       riskScore: result.riskScore,
+      reason: result.explanation,
+      indicators: result.indicators,
+      recommendation: result.recommendation,
+      source: result.source,
+      category: result.category,
+      explanation: result.explanation,
+      recipientReputation: result.recipientReputation,
       details: result
     };
   }
