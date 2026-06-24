@@ -471,26 +471,6 @@ export default function App() {
       {/* --- CONTENT WORKSPACE --- */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-8 flex flex-col gap-8">
         
-        {/* TOP INTRO CARD */}
-        <section className="bg-deepbrown border border-[#3A3230] rounded-2xl p-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-[0.03]">
-            <Shield className="w-40 h-40 text-[#EEE5BC]" />
-          </div>
-          <div className="flex gap-4">
-            <div className="p-3 bg-[#4289CB]/10 text-[#4289CB] rounded-xl border border-[#4289CB]/20 h-fit shrink-0">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-[#EEE5BC]">Simplicity is the Best Security</h2>
-              <p className="text-xs text-slate-300 mt-1 leading-relaxed max-w-3xl">
-                Traditional crypto tools make you read complex technical logs and delegate permissions. <strong>Shell keeps it simple.</strong> 
-                It acts as a smart silent barrier in the background of your wallet. When you trigger a transfer, Shell scans the receiver for scams, deceptive clones, or automated drains. 
-                And when you click <strong>"Away"</strong>, we freeze everything instantly so hackers can't sweep your funds even if your computer gets compromised.
-              </p>
-            </div>
-          </div>
-        </section>
-
         {/* CONTROLS GRID */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
@@ -840,34 +820,11 @@ export default function App() {
 
         </section>
 
-        {/* SECURE SIMPLIFIED EDUCATION SECTION */}
-        <section className="bg-deepbrown/60 border border-[#3A3230] rounded-2xl p-6">
-          <h3 className="font-bold text-[#EEE5BC] text-sm mb-3 flex items-center gap-2">
-            <HelpCircle className="w-4 h-4 text-[#4289CB]" />
-            How Shell Shields Your Coins
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-300 leading-relaxed">
-            <div>
-              <h4 className="font-bold text-white mb-1">What is background scanner security?</h4>
-              <p>
-                When you sign any crypto transaction on a dApp, Shell checks the receiving wallet against a registry of blacklist indicators, suspicious transfer sizes, or cloned addresses designed to look like your friends. It requires no technical knowledge and runs automatically.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-bold text-white mb-1">How does Away Mode stop hacks?</h4>
-              <p>
-                If your keys are ever stolen by a malicious browser extension, the thieves will try to instantly drain your wallet. When Away Mode is active, the wallet automatically blocks all transfers, requiring you to physically confirm you are back online before anything can move.
-              </p>
-            </div>
-          </div>
-        </section>
-
       </main>
 
       {/* --- FOOTER --- */}
       <footer className="border-t border-[#2A2422] py-6 text-center text-xs text-slate-500 mt-auto bg-deepbrown">
         <p>© 2026 Shell Security. Your Offline & Online Shield.</p>
-        <p className="text-[10px] text-slate-600 mt-1">Cohesive protection theme accented in Butter and Ocean.</p>
       </footer>
 
     </div>
