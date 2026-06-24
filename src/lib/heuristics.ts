@@ -1,3 +1,5 @@
+import { fetchAccountInfo } from "./solanaRpc";
+
 export interface AnalysisResult {
   riskScore: number;
   category: string;
@@ -66,7 +68,7 @@ export const SIMULATED_THREAT_DATABASE: Record<string, Omit<AnalysisResult, 'sou
   }
 };
 
-export function analyzeAddress(params: AnalysisParams): AnalysisResult {
+export async function analyzeAddress(params: AnalysisParams): Promise<AnalysisResult> {
   const { address, transferAmount, transactionType, contactList } = params;
 
   // Helpers to sanitize
@@ -145,16 +147,52 @@ export function analyzeAddress(params: AnalysisParams): AnalysisResult {
   }
 
   // e. Default → riskScore 20, unverified
+  let riskScore = 20;
+  const indicators: string[] = [
+    "Address is not present in local contacts or known blacklists"
+  ];
+
+  // Fetch real-time on-chain info
+  const rpcInfo = await fetchAccountInfo(cleanAddress);
+
+  if (!rpcInfo.exists) {
+    indicators.push("Address has zero on-chain history");
+    riskScore += 20;
+  }
+
+  const isDirectTransfer = (transactionType || "").toLowerCase() === "direct transfer";
+  if (rpcInfo.isProgram && isDirectTransfer) {
+    indicators.push("Destination is a program account, not a wallet");
+    riskScore += 30;
+  }
+
+  // Cap risk score between 0 and 100
+  riskScore = Math.min(100, Math.max(0, riskScore));
+
+  let category = "Unverified Private Wallet";
+  let explanation = `This is an unverified recipient wallet address. No active scam flags or mimic address patterns were detected, but it lacks a registered safety score. Proceed with standard verification.`;
+  let recommendation = `Proceed with transaction. Ensure you verify the address details directly with the recipient.`;
+  let recipientReputation = "Unverified Private Wallet";
+
+  if (rpcInfo.isProgram) {
+    category = "Program Account Warning";
+    explanation = `The destination address is a deployed Solana smart contract program, not a user's personal wallet. Direct transfers to program accounts without instructions can permanently lock your SOL.`;
+    recommendation = `REJECT signature if you intended to send to a normal personal wallet.`;
+    recipientReputation = "On-Chain Program / Smart Contract";
+  } else if (!rpcInfo.exists) {
+    category = "New / Empty Wallet Warning";
+    explanation = `This address has absolutely zero transaction history on the Solana mainnet. It could be a newly generated user wallet, but it carries higher inherent risk.`;
+    recommendation = `Double check every character. Consider sending a tiny test transfer of 0.01 SOL first to confirm ownership.`;
+    recipientReputation = "No On-Chain History";
+  }
+
   return {
-    riskScore: 20,
-    category: "Unverified Private Wallet",
-    indicators: [
-      "Address is not present in local contacts or known blacklists",
-      "No dynamic security threat patterns detected on this address"
-    ],
-    explanation: `This is an unverified recipient wallet address. No active scam flags or mimic address patterns were detected, but it lacks a registered safety score. Proceed with standard verification.`,
-    recommendation: `Proceed with transaction. Ensure you verify the address details directly with the recipient.`,
-    recipientReputation: "Unverified Private Wallet",
+    riskScore,
+    category,
+    indicators,
+    explanation,
+    recommendation,
+    recipientReputation,
     source: "local-heuristic"
   };
 }
