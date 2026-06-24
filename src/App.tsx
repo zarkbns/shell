@@ -44,17 +44,59 @@ interface SimplifiedLog {
   explanation: string;
 }
 
-interface PreSetScenario {
+interface SandboxScenario {
   id: string;
-  title: string;
-  description: string;
-  threatLevel: 'Scam Threat' | 'Mimic Trap' | 'Rogue Background Attempt' | 'Safe Direct Transfer';
-  recipientName: string;
+  name: string;
+  attackType: string;
+  recipient: string;
   amount: string;
-  payloadDescription: string;
-  riskDescription: string;
-  recommendation: string;
+  memo: string;
+  description: string;
+  responseSummary: string;
 }
+
+const SANDBOX_SCENARIOS: SandboxScenario[] = [
+  {
+    id: 'airdrop',
+    name: 'Claim "Free Airdrop"',
+    attackType: 'Deceptive contract-approval drain',
+    recipient: 'TokenClaimRewardsProgram1111111111111111',
+    amount: '0.0',
+    memo: 'Program: DelegateAuthority { amount: Max_Uint64 }',
+    description: 'Simulates clicking a "Claim" button on a scam page requesting full account delegate permissions.',
+    responseSummary: 'Shell SDK intercepts the pre-flight transaction, decodes the instruction payload, identifies the unauthorized high-risk authority delegate request, and rejects signing.'
+  },
+  {
+    id: 'mimic',
+    name: 'Mimic Address Trap',
+    attackType: 'Poisoned address (matches Alice\'s first/last chars)',
+    recipient: 'Alice77FakeMimicAddressPoison7R8S',
+    amount: '12.0',
+    memo: 'Transfer SOL',
+    description: 'Simulates a transfer to a generated address matching Alice\'s start/end characters (Alice...7R8S).',
+    responseSummary: 'Shell SDK scans contacts, notices the destination matches Alice\'s first/last letters but is NOT Alice\'s actual verified address, flags it as a copy-paste attack, and blocks it.'
+  },
+  {
+    id: 'rogue',
+    name: 'Rogue App Activity',
+    attackType: 'Background transfer while user is Away',
+    recipient: 'UnknownMaliciousActorWalletAddress',
+    amount: '25.0',
+    memo: 'Transfer SOL (Silent background trigger)',
+    description: 'Simulates a background malware extension attempting a signature dispatch when the user is away.',
+    responseSummary: 'Shell SDK checks the active Away Mode state flag in the wallet and blocks all signature dispatches instantly before they can reach the user confirmation stage.'
+  },
+  {
+    id: 'sister',
+    name: 'Send to Sister Alice',
+    attackType: 'Normal transfer to verified contact',
+    recipient: 'AliceSisterVerifiedWallet7R8S',
+    amount: '3.5',
+    memo: 'Gift SOL',
+    description: 'Simulates a routine, safe, direct transfer to your trusted contact Alice.',
+    responseSummary: 'Shell SDK matches the recipient against the verified local Trusted Contacts list, bypasses high-value security checks, and immediately signs and routes the transaction.'
+  }
+];
 
 export default function App() {
   // --- Simplified State ---
@@ -74,8 +116,8 @@ export default function App() {
   const [txNote, setTxNote] = useState('');
   
   // --- Active Testing State ---
+  const [activeScenarioId, setActiveScenarioId] = useState<string>('');
   const [pipelineState, setPipelineState] = useState<'idle' | 'checking' | 'blocked' | 'pin-required' | 'approved'>('idle');
-  const [currentScenario, setCurrentScenario] = useState<PreSetScenario | null>(null);
   const [enteredPin, setEnteredPin] = useState('');
   const [pinError, setPinError] = useState('');
   const [customExplanation, setCustomExplanation] = useState('');
@@ -108,63 +150,6 @@ export default function App() {
     }
   ]);
 
-  // --- Simplified Scenarios representing typical situations ---
-  const SIMULATION_SCENARIOS: PreSetScenario[] = [
-    {
-      id: 'claim-scam',
-      title: 'Claim "Free Crypto" Link',
-      description: 'Simulate clicking a deceptive link claiming to give you free coins.',
-      threatLevel: 'Scam Threat',
-      recipientName: 'Fake Rewards Claim Site',
-      amount: '0.0',
-      payloadDescription: 'Secretly requests full permission to transfer your digital tokens.',
-      riskDescription: 'This looks like a free token claim, but its hidden command is designed to drain your entire wallet instantly.',
-      recommendation: 'Shell blocked this request. Never sign any permission prompts on unverified rewards pages.'
-    },
-    {
-      id: 'cloned-wallet',
-      title: 'Mimic Address Trap',
-      description: 'Simulate a fake wallet generated to look like your sister Alice.',
-      threatLevel: 'Mimic Trap',
-      recipientName: 'Alice (Mimic Clone Wallet)',
-      amount: '12.0',
-      payloadDescription: 'Address matches the start and end of Alice, but has different middle characters.',
-      riskDescription: 'Scammers generate fake addresses matching your friends to trick you into copy-pasting the wrong account.',
-      recommendation: 'Do not copy this account. Use your saved Trusted Contacts instead.'
-    },
-    {
-      id: 'offline-hack',
-      title: 'Rogue App Activity (Away Test)',
-      description: 'Simulate an unapproved app attempting a secret transfer while you are away.',
-      threatLevel: 'Rogue Background Attempt',
-      recipientName: 'Unknown External Address',
-      amount: '25.0',
-      payloadDescription: 'Automatic background transaction initiated without your active presence.',
-      riskDescription: 'Unexpected high-value movement. Because Away Mode is turned ON, all outbound activity is frozen to safeguard your savings.',
-      recommendation: 'Turn on Away Mode whenever you close your wallet to prevent rogue browser extensions from moving funds.'
-    },
-    {
-      id: 'safe-transfer',
-      title: 'Send to Sister Alice',
-      description: 'Simulate a routine, secure transfer to your trusted contact.',
-      threatLevel: 'Safe Direct Transfer',
-      recipientName: 'Alice (Sister)',
-      amount: '3.5',
-      payloadDescription: 'Direct standard transfer to a verified contact.',
-      riskDescription: 'This address is stored safely in your personal Trusted Contacts and has a clean security history.',
-      recommendation: 'Perfect security rating. Safe to complete transfer.'
-    }
-  ];
-
-  // Apply scenario parameters to the simple form
-  const applyScenario = (sc: PreSetScenario) => {
-    setCurrentScenario(sc);
-    setRecipientInput(sc.recipientName);
-    setAmountInput(sc.amount);
-    setTxNote(sc.payloadDescription);
-    setPipelineState('idle');
-  };
-
   // Run protection logic
   const handleInterceptAndCheck = (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,50 +162,51 @@ export default function App() {
     setTimeout(() => {
       // 1. If shield is turned off completely
       if (!isShieldActive) {
-        approveTransaction('Protection disabled. Completed unprotected.');
+        approveTransaction('Protection disabled. Signature dispatched unprotected.');
         return;
       }
 
-      // 2. Is Away Mode ON?
-      if (isAwayModeActive) {
+      // 2. Is Away Mode ON? (Checks active state or rogue app attempt scenario)
+      if (isAwayModeActive || activeScenarioId === 'rogue') {
+        if (!isAwayModeActive && activeScenarioId === 'rogue') {
+          // If simulating rogue activity but away mode is OFF
+          approveTransaction('Warning: Transaction signed! Background transaction was allowed because Away Mode is OFF. Turn Away Mode ON to instantly block background activity.');
+          return;
+        }
         blockTransaction(
-          'Blocked by Away-Mode Lock',
-          'Shell stopped this outbound activity because your wallet is in Away Mode. Turn Away Mode off when you want to make transfers.'
+          'Blocked: Device Locked (Away Mode)',
+          'Shell SDK detected active Away Mode flag in wallet. Outbound transaction aborted to stop unauthorized background signing.'
         );
         return;
       }
 
-      // 3. Scan for common mock indicators
-      const isDangerousScam = recipientInput.toLowerCase().includes('scam') || 
-                              recipientInput.toLowerCase().includes('fake') || 
-                              (currentScenario && currentScenario.threatLevel === 'Scam Threat');
+      // 3. Scan for common mock indicators or specific active scenarios
+      const inputLower = recipientInput.toLowerCase();
+      const isDangerousScam = inputLower.includes('scam') || 
+                              inputLower.includes('fake') || 
+                              inputLower.includes('drain') ||
+                              inputLower.includes('reward') ||
+                              inputLower.includes('claim') ||
+                              activeScenarioId === 'airdrop';
                      
-      const isMimicAttack = recipientInput.toLowerCase().includes('mimic') || 
-                            (currentScenario && currentScenario.threatLevel === 'Mimic Trap');
-
-      const isRogueAttempt = (currentScenario && currentScenario.threatLevel === 'Rogue Background Attempt');
+      const isMimicAttack = inputLower.includes('mimic') || 
+                            inputLower.includes('clone') ||
+                            inputLower.includes('poison') ||
+                            activeScenarioId === 'mimic';
 
       if (scamDetectionEnabled) {
-        if (isRogueAttempt) {
-          blockTransaction(
-            'Blocked: Device Protection Locked',
-            'Shell prevented an automated transfer because your account is locked in Away Mode. This blocks background malware from running transactions.'
-          );
-          return;
-        }
-
         if (isDangerousScam) {
           blockTransaction(
-            'Blocked: Critical Theft Pattern',
-            'Our scanner identified this destination as a known asset-draining trap designed to empty your wallet. Transfer stopped automatically.'
+            'Blocked: High-Risk Permission Scope',
+            'Shell SDK decoded the instruction payload and flagged high-risk permission delegate requests (DelegateAuthority). Signing rejected to prevent token drain.'
           );
           return;
         }
 
         if (isMimicAttack) {
           blockTransaction(
-            'Blocked: Mimic Account Trap',
-            'Warning: This address is designed to look like your sister Alice but is a different, unverified wallet. This is a clone hack attempt.'
+            'Blocked: Mimic Address Mismatch',
+            'Warning: Destination matches Alice\'s first and last characters (Alice...7R8S) but has a mismatched middle sequence. This is a copy-paste poisoning attempt.'
           );
           return;
         }
@@ -228,17 +214,21 @@ export default function App() {
 
       // 4. Require PIN for high-value transfers
       const amount = parseFloat(amountInput) || 0;
-      const isWhitelisted = trustedContacts.some(c => recipientInput.includes(c.name));
+      const isWhitelisted = trustedContacts.some(c => recipientInput.includes(c.name)) || activeScenarioId === 'sister';
 
       if (isPinRequired && amount > transferLimit && !isWhitelisted) {
         setPipelineState('pin-required');
-        setCustomExplanation(`This transfer of ${amount} SOL is above your limit of ${transferLimit} SOL to unverified addresses. Confirm with your PIN to proceed.`);
+        setCustomExplanation(`This transfer of ${amount} SOL exceeds the configured single-transaction limit of ${transferLimit} SOL to unverified addresses. Physical PIN authentication required.`);
         return;
       }
 
       // Safe transfer
-      approveTransaction('Verified Safe Transfer completed successfully.');
-    }, 1100);
+      approveTransaction(
+        isWhitelisted 
+          ? 'Safe transaction: Recipient is a trusted verified contact. Intercept cleared.'
+          : 'Verified Safe Transfer completed successfully.'
+      );
+    }, 1200);
   };
 
   const blockTransaction = (title: string, msg: string) => {
@@ -267,13 +257,22 @@ export default function App() {
     const newLog: SimplifiedLog = {
       id: `log-${Date.now()}`,
       timestamp: 'Just now',
-      title: 'Safe Transfer Sent',
+      title: 'Safe & Approved',
       destination: recipientInput,
       amount: `${amountInput} SOL`,
       status: 'Safe & Approved',
       explanation: msg
     };
     setLogs(prev => [newLog, ...prev]);
+  };
+
+  // Apply scenario payload to form
+  const applyScenario = (sc: SandboxScenario) => {
+    setActiveScenarioId(sc.id);
+    setRecipientInput(sc.recipient);
+    setAmountInput(sc.amount);
+    setTxNote(sc.memo);
+    setPipelineState('idle');
   };
 
   // Verify PIN
@@ -291,7 +290,7 @@ export default function App() {
     setAmountInput('1.5');
     setTxNote('');
     setPipelineState('idle');
-    setCurrentScenario(null);
+    setActiveScenarioId('');
   };
 
   // Add contact
@@ -392,23 +391,23 @@ export default function App() {
 
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xl font-bold tracking-tight text-[#EEE5BC] font-mono">SHELL</span>
-                <span className="text-[10px] bg-[#4289CB] text-white px-2 py-0.5 rounded-full font-semibold">SAFEGUARD</span>
+                <span className="text-xl font-bold tracking-tight text-[#EEE5BC] font-mono">SHELL SDK</span>
+                <span className="text-[10px] bg-[#4289CB] text-white px-2 py-0.5 rounded-full font-semibold">SANDBOX</span>
               </div>
-              <p className="text-xs text-slate-400">Simplified Background Protector for Crypto Wallets</p>
+              <p className="text-xs text-slate-400">Pre-flight Signing Pipeline Intercept Simulator</p>
             </div>
           </div>
 
           {/* Simple Clean Balance */}
           <div className="flex items-center gap-4 bg-deepbrown border border-[#3A3230] rounded-xl px-4 py-2">
             <div className="text-right">
-              <span className="text-[9px] text-[#EEE5BC]/70 uppercase font-bold block">Balance</span>
+              <span className="text-[9px] text-[#EEE5BC]/70 uppercase font-bold block">Simulated Wallet</span>
               <span className="text-base font-bold text-[#EEE5BC] font-mono">{balance.toFixed(2)} SOL</span>
             </div>
             <div className="border-l border-[#3A3230] h-8 pl-3 flex flex-col justify-center">
-              <span className="text-[9px] text-slate-500 uppercase font-bold block">Shield</span>
+              <span className="text-[9px] text-slate-500 uppercase font-bold block">SDK Hook</span>
               <span className="text-xs text-[#4289CB] font-bold">
-                {isAwayModeActive ? 'Away Mode (Frozen)' : 'Active Monitoring'}
+                {isAwayModeActive ? 'Away Mode Active' : 'Pre-flight Monitor'}
               </span>
             </div>
           </div>
@@ -422,9 +421,9 @@ export default function App() {
           
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex items-center gap-2">
-              <span className="text-[#EEE5BC]/80 font-medium">Automatic Anti-Theft Protection:</span>
+              <span className="text-[#EEE5BC]/80 font-medium">SDK Pre-flight Interceptor:</span>
               <span className={`font-bold ${isShieldActive ? 'text-[#4289CB]' : 'text-slate-500'}`}>
-                {isShieldActive ? 'ON (Background Interceptor Running)' : 'OFF (Warning: Unprotected)'}
+                {isShieldActive ? 'ON (Listening for signatures)' : 'OFF (Warning: Unprotected)'}
               </span>
             </div>
 
@@ -471,80 +470,163 @@ export default function App() {
       {/* --- CONTENT WORKSPACE --- */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-8 flex flex-col gap-8">
         
+        {/* SANDBOX SCENARIOS SECTION */}
+        <section className="bg-deepbrown border border-[#3A3230] rounded-2xl p-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
+            <div>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-[#EEE5BC] flex items-center gap-2">
+                <Shield className="w-4 h-4 text-[#4289CB]" />
+                Select Sandbox Scenario Payload
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Inject representative Web3 threat or safe payloads into the transaction pre-flight pipeline.
+              </p>
+            </div>
+            <span className="text-[10px] bg-[#4289CB]/10 text-[#4289CB] border border-[#4289CB]/20 px-2 py-1 rounded font-mono shrink-0 w-fit">
+              4 Pre-loaded Test Cases
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {SANDBOX_SCENARIOS.map((sc) => {
+              const isSelected = activeScenarioId === sc.id;
+              return (
+                <button
+                  key={sc.id}
+                  onClick={() => applyScenario(sc)}
+                  className={`text-left p-4 rounded-xl border transition-all flex flex-col justify-between group ${
+                    isSelected
+                      ? 'bg-[#1C1817] border-[#4289CB] shadow-lg shadow-[#4289CB]/10'
+                      : 'bg-[#1C1817]/40 border-[#2A2422] hover:bg-[#1C1817]/80 hover:border-[#3A3230]'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <span className="font-bold text-xs text-[#FAF9F6] group-hover:text-[#4289CB] transition-colors line-clamp-1">
+                        {sc.name}
+                      </span>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase shrink-0 ${
+                        sc.id === 'sister'
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                          : 'bg-[#EEE5BC]/10 text-[#EEE5BC] border border-[#EEE5BC]/20'
+                      }`}>
+                        {sc.id === 'sister' ? 'Safe' : 'Threat'}
+                      </span>
+                    </div>
+                    
+                    <p className="text-[10px] text-slate-500 font-mono mb-2 line-clamp-1">
+                      {sc.attackType}
+                    </p>
+                    
+                    <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-2 mb-3">
+                      {sc.description}
+                    </p>
+                  </div>
+
+                  <div className="text-[10px] text-[#4289CB] pt-2 border-t border-[#2A2422] flex items-center justify-between w-full mt-auto">
+                    <span className="font-medium group-hover:underline">Inject Payload</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-[#4289CB] group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* INTERACTIVE PIPELINE FLOW VISUALIZER */}
+        <section className="bg-[#1C1817]/40 border border-[#2A2422] rounded-2xl p-6">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-[#EEE5BC] mb-4 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#4289CB]" />
+            Active Signing Pipeline Intercept Visualizer
+          </h3>
+
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 bg-[#120F0E] rounded-xl border border-[#2A2422]/60">
+            
+            {/* Node 1 */}
+            <div className={`flex-1 w-full p-3.5 rounded-xl border text-center transition-all ${
+              pipelineState === 'idle'
+                ? 'bg-[#1C1817] border-[#3A3230] text-[#EEE5BC]'
+                : 'bg-[#120F0E] border-[#2A2422] text-slate-500'
+            }`}>
+              <span className="text-[9px] uppercase font-bold block mb-1">Step 1</span>
+              <span className="text-xs font-bold block">1. dApp Request</span>
+              <span className="text-[10px] text-slate-400 mt-1 block">Transaction Triggered</span>
+            </div>
+
+            <ArrowRight className="w-4 h-4 text-[#3A3230] rotate-90 lg:rotate-0" />
+
+            {/* Node 2 */}
+            <div className={`flex-1 w-full p-3.5 rounded-xl border text-center transition-all ${
+              pipelineState === 'checking'
+                ? 'bg-[#4289CB]/10 border-[#4289CB] text-[#4289CB] animate-pulse'
+                : 'bg-[#120F0E] border-[#2A2422] text-slate-500'
+            }`}>
+              <span className="text-[9px] uppercase font-bold block mb-1">Step 2</span>
+              <span className="text-xs font-bold block">2. Intercept Hook</span>
+              <span className="text-[10px] text-slate-400 mt-1 block">Shell SDK Active</span>
+            </div>
+
+            <ArrowRight className="w-4 h-4 text-[#3A3230] rotate-90 lg:rotate-0" />
+
+            {/* Node 3 */}
+            <div className={`flex-1 w-full p-3.5 rounded-xl border text-center transition-all ${
+              pipelineState === 'pin-required'
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                : 'bg-[#120F0E] border-[#2A2422] text-slate-500'
+            }`}>
+              <span className="text-[9px] uppercase font-bold block mb-1">Step 3</span>
+              <span className="text-xs font-bold block">3. Rule Evaluation</span>
+              <span className="text-[10px] text-slate-400 mt-1 block">Away / Mimic / Limit Checks</span>
+            </div>
+
+            <ArrowRight className="w-4 h-4 text-[#3A3230] rotate-90 lg:rotate-0" />
+
+            {/* Node 4 */}
+            <div className={`flex-1 w-full p-3.5 rounded-xl border text-center transition-all ${
+              pipelineState === 'blocked'
+                ? 'bg-rose-950/20 border-rose-500/30 text-rose-400'
+                : pipelineState === 'approved'
+                ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-400'
+                : 'bg-[#120F0E] border-[#2A2422] text-slate-500'
+            }`}>
+              <span className="text-[9px] uppercase font-bold block mb-1">Step 4</span>
+              <span className="text-xs font-bold block">
+                {pipelineState === 'blocked' ? 'Blocked & Aborted' : pipelineState === 'approved' ? 'Signed Successfully' : '4. Signature Outcome'}
+              </span>
+              <span className="text-[10px] text-slate-400 mt-1 block">User Sign / Reject Outcome</span>
+            </div>
+
+          </div>
+        </section>
+
         {/* CONTROLS GRID */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
-          {/* LEFT: LIVE SCENARIO TESTS & FORM */}
+          {/* LEFT: LIVE INTEGRATION TEST & FORM */}
           <div className="flex flex-col gap-6">
             
-            {/* SIMULATED HACKS TO CHOOSE */}
-            <div>
-              <h3 className="text-xs text-[#EEE5BC] font-bold uppercase tracking-wider mb-3">
-                Try a Security Simulation below:
-              </h3>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {SIMULATION_SCENARIOS.map((sc) => {
-                  const isChosen = currentScenario?.id === sc.id;
-                  return (
-                    <button
-                      key={sc.id}
-                      onClick={() => applyScenario(sc)}
-                      className={`text-left p-4 rounded-xl border transition-all flex flex-col justify-between group ${
-                        isChosen
-                          ? 'bg-deepbrown border-[#4289CB] shadow-lg shadow-[#4289CB]/10'
-                          : 'bg-[#1C1817]/40 border-[#2A2422] hover:bg-deepbrown hover:border-[#3A3230]'
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between gap-2 mb-1.5">
-                          <span className="font-bold text-xs text-[#FAF9F6] group-hover:text-[#4289CB] transition-colors">
-                            {sc.title}
-                          </span>
-                          <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${
-                            sc.threatLevel === 'Safe Direct Transfer'
-                              ? 'bg-[#4289CB]/20 text-[#4289CB]'
-                              : 'bg-[#EEE5BC]/20 text-[#EEE5BC]'
-                          }`}>
-                            {sc.threatLevel === 'Safe Direct Transfer' ? 'Safe' : 'Scam Match'}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-400 leading-relaxed">
-                          {sc.description}
-                        </p>
-                      </div>
-                      
-                      <div className="text-[10px] text-slate-500 mt-4 pt-2 border-t border-[#2A2422] flex items-center justify-between w-full">
-                        <span>Load transfer</span>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* SIMPLIFIED TRANSFER PANEL */}
+            {/* INTERACTIVE PRE-FLIGHT TEST PANEL */}
             <div className="bg-deepbrown border border-[#3A3230] rounded-2xl p-6">
-              <h3 className="font-bold text-white text-sm mb-4 flex items-center justify-between">
-                <span>Simulator Sandbox</span>
-                {currentScenario && (
-                  <span className="text-xs text-[#4289CB] font-bold">
-                    Preset Loaded: {currentScenario.title}
-                  </span>
-                )}
+              <h3 className="font-bold text-white text-sm mb-1 flex items-center justify-between">
+                <span>Pre-flight Intercept Tool</span>
+                <span className="text-[10px] bg-[#4289CB]/20 text-[#4289CB] px-2 py-0.5 rounded-full font-bold uppercase">
+                  Active SDK Hooks
+                </span>
               </h3>
+              <p className="text-xs text-slate-400 mb-5 leading-relaxed">
+                Test the signing pipeline in real-time. Enter a recipient and amount below to trigger the SDK intercept. Try typing <strong>"scam"</strong> or <strong>"mimic"</strong> to see heuristics in action.
+              </p>
 
               <form onSubmit={handleInterceptAndCheck} className="flex flex-col gap-4">
                 
-                {/* Simplified address destination label */}
+                {/* Destination input */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs text-slate-400 font-medium">Send To</label>
+                  <label className="text-xs text-slate-400 font-medium">Recipient Address or Contact Name</label>
                   <input
                     type="text"
                     value={recipientInput}
                     onChange={(e) => setRecipientInput(e.target.value)}
-                    placeholder="Enter wallet name or custom address label..."
+                    placeholder="Enter wallet address or contact name..."
                     className="w-full bg-slate-950 border border-[#2A2422] focus:border-[#4289CB] rounded-xl px-3 py-2.5 text-xs text-white outline-none font-mono"
                     required
                   />
@@ -552,7 +634,7 @@ export default function App() {
 
                 {/* Amount */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs text-slate-400 font-medium">How much to send (SOL)</label>
+                  <label className="text-xs text-slate-400 font-medium">Transfer Amount (SOL)</label>
                   <input
                     type="number"
                     step="0.1"
@@ -564,13 +646,17 @@ export default function App() {
                   />
                 </div>
 
-                {/* Simulated action details (no jargon, just human description) */}
-                {txNote && (
-                  <div className="p-3.5 bg-slate-950 border border-[#2A2422] rounded-xl text-xs text-slate-300">
-                    <span className="text-[10px] text-slate-500 block uppercase font-bold">Background Activity Note:</span>
-                    {txNote}
-                  </div>
-                )}
+                {/* Optional action details (no jargon, just human description) */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs text-slate-400 font-medium">Transaction Memo (Optional)</label>
+                  <input
+                    type="text"
+                    value={txNote}
+                    onChange={(e) => setTxNote(e.target.value)}
+                    placeholder="Optional transaction context or contract function..."
+                    className="w-full bg-slate-950 border border-[#2A2422] focus:border-[#4289CB] rounded-xl px-3 py-2.5 text-xs text-white outline-none"
+                  />
+                </div>
 
                 {/* ACTION TRIGGER BUTTON */}
                 <div className="flex gap-2.5 mt-2">
@@ -581,16 +667,16 @@ export default function App() {
                   >
                     {pipelineState === 'checking' ? (
                       <>
-                        <RefreshCw className="w-4 h-4 animate-spin" /> Shell Shield Verifying Address...
+                        <RefreshCw className="w-4 h-4 animate-spin" /> SDK Scanning Transaction Details...
                       </>
                     ) : (
                       <>
-                        <Shield className="w-4 h-4 text-[#EEE5BC]" /> Intercept & Send Securely
+                        <Shield className="w-4 h-4 text-[#EEE5BC]" /> Intercept & Scan Signature
                       </>
                     )}
                   </button>
 
-                  {currentScenario && (
+                  {recipientInput && (
                     <button
                       type="button"
                       onClick={handleReset}
@@ -618,12 +704,17 @@ export default function App() {
                             {customExplanation}
                           </p>
                           
-                          {currentScenario && (
-                            <div className="mt-3.5 p-3 bg-slate-950/80 rounded-lg border border-[#2A2422] text-xs">
-                              <span className="text-[#EEE5BC] font-semibold block mb-0.5">Shell Protection Advice:</span>
-                              <span className="text-slate-400">{currentScenario.recommendation}</span>
-                            </div>
-                          )}
+                          <div className="mt-3.5 p-3 bg-slate-950/80 rounded-lg border border-[#2A2422] text-xs">
+                            <span className="text-[#EEE5BC] font-semibold block mb-0.5">Shell Protection Advice:</span>
+                            <span className="text-slate-400">
+                              {isAwayModeActive 
+                                ? 'Your account is frozen due to Away Mode. Turn Away Mode off in the top status bar when you are ready to make transfers.' 
+                                : recipientInput.toLowerCase().includes('scam') || recipientInput.toLowerCase().includes('fake')
+                                ? 'Never sign permission requests on unverified sites or messages promising giveaways.'
+                                : 'Ensure you use your saved Trusted Contacts to verify the recipient wallet before proceeding.'
+                              }
+                            </span>
+                          </div>
 
                           <div className="mt-4 flex items-center gap-3">
                             <span className="text-[10px] bg-rose-950 text-rose-300 px-2 py-0.5 rounded border border-rose-900 font-semibold">
