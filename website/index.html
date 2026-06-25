@@ -5,75 +5,103 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shell — Wallet Security SDK</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,900;1,9..144,900&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: '#4289CB',
+            butter: '#EEE5BC',
+            darknavy: '#111827',
+            codebg: '#1a2535',
+          },
+          fontFamily: {
+            serif: ['Fraunces', 'Georgia', 'serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    /* Prevent any browser-level default shadows or gradients from slipping in */
+    /* Strict Flat Design — Zero Shadows & Gradients */
     *, *::before, *::after {
       box-shadow: none !important;
       background-image: none !important;
       text-shadow: none !important;
     }
     
-    /* System font matching system-ui rules */
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* Smooth Scroll and Selection Styling */
+    html {
+      scroll-behavior: smooth;
     }
-
-    /* Clipboard notification overlay animation */
-    .toast {
-      transition: opacity 0.2s ease, transform 0.2s ease;
+    ::selection {
+      background-color: #4289CB;
+      color: #EEE5BC;
     }
   </style>
 </head>
-<body class="bg-[#111827] text-[#EEE5BC] antialiased selection:bg-[#4289CB] selection:text-[#EEE5BC]">
+<body class="bg-darknavy text-butter antialiased font-sans">
 
-  <!-- NAVBAR -->
-  <header id="navbar" class="sticky top-0 z-50 bg-[#111827] border-b border-[#4289CB]/30 transition-colors duration-200 py-4 px-6 md:px-12 flex justify-between items-center">
-    <a href="#home" class="text-xl font-extrabold tracking-tight text-[#4289CB] hover:opacity-80 transition-opacity">
+  <!-- NAVBAR (dark #111827, sticky) -->
+  <header id="navbar" class="sticky top-0 z-50 bg-darknavy border-b border-brand/30 transition-all duration-200 py-4 px-6 md:px-12 flex justify-between items-center">
+    <a href="#home" class="text-2xl font-serif font-extrabold tracking-tight text-brand hover:opacity-80 transition-opacity">
       Shell
     </a>
-    <nav class="flex items-center gap-6 md:gap-8 font-semibold text-sm text-[#EEE5BC]">
-      <a href="#how-it-works" class="hover:text-[#4289CB] transition-colors">How it works</a>
-      <a href="#docs-full" class="hover:text-[#4289CB] transition-colors">Docs</a>
-      <a href="#install" class="hover:text-[#4289CB] transition-colors">Install</a>
-      <a href="https://github.com/zarkbns/shell" target="_blank" rel="noopener noreferrer" class="text-[#4289CB] hover:underline flex items-center gap-1">
+    <nav class="flex items-center gap-6 md:gap-10 font-bold text-xs md:text-sm tracking-wider uppercase text-butter">
+      <a href="#why" class="hover:text-brand transition-colors">Why Shell</a>
+      <a href="#how-it-works" class="hover:text-brand transition-colors">How it works</a>
+      <a href="#docs-full" class="hover:text-brand transition-colors">Docs</a>
+      <a href="#install" class="hover:text-brand transition-colors">Install</a>
+      <a href="https://github.com/zarkbns/shell" target="_blank" rel="noopener noreferrer" class="text-brand hover:underline flex items-center gap-1">
         GitHub &rarr;
       </a>
     </nav>
   </header>
 
   <!-- SECTION 1 — HERO (dark #111827) -->
-  <section id="home" class="min-h-screen bg-[#111827] flex flex-col items-center justify-center text-center px-6 py-20 md:py-32">
+  <section id="home" class="min-h-screen bg-darknavy flex flex-col items-center justify-center text-center px-6 py-24 md:py-36 border-b border-brand/20">
     <div class="max-w-4xl mx-auto flex flex-col items-center">
-      <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-[#EEE5BC] leading-none mb-6">
+      <!-- Giant centered Solflare-style Branding Accent -->
+      <span class="text-6xl md:text-9xl font-serif font-black tracking-tighter text-brand mb-8 leading-none select-none">
+        Shell
+      </span>
+      
+      <!-- Headline: Bold, Large (clamp) -->
+      <h1 class="text-[clamp(2.3rem,7vw,4.5rem)] font-serif font-black tracking-tight text-butter leading-none mb-6">
         Transaction security.<br>Native to your wallet.
       </h1>
-      <p class="text-base md:text-xl font-medium text-[#EEE5BC]/80 max-w-2xl leading-relaxed mb-10">
+      
+      <!-- Subheadline -->
+      <p class="text-base md:text-xl font-medium text-butter/80 max-w-2xl leading-relaxed mb-10">
         Shell intercepts transactions before they reach the blockchain — a modular SDK built to live inside Phantom, Solflare, and Backpack.
       </p>
       
       <!-- Two buttons side by side -->
-      <div class="flex flex-col sm:flex-row gap-4 mb-8 w-full sm:w-auto justify-center">
-        <a href="https://github.com/zarkbns/shell" target="_blank" rel="noopener noreferrer" class="px-8 py-4 bg-[#4289CB] text-[#EEE5BC] font-extrabold text-lg rounded-none hover:opacity-90 transition-opacity text-center">
+      <div class="flex flex-col sm:flex-row gap-4 mb-10 w-full sm:w-auto justify-center">
+        <a href="https://github.com/zarkbns/shell" target="_blank" rel="noopener noreferrer" class="px-8 py-4 bg-brand text-butter font-bold text-base tracking-wider uppercase hover:opacity-90 transition-opacity text-center">
           View on GitHub
         </a>
-        <a href="#docs-full" class="px-8 py-4 border-2 border-[#4289CB] text-[#4289CB] font-extrabold text-lg rounded-none hover:bg-[#4289CB] hover:text-[#EEE5BC] transition-colors text-center">
+        <a href="#docs-full" class="px-8 py-4 border-2 border-brand text-brand font-bold text-base tracking-wider uppercase hover:bg-brand hover:text-butter transition-colors text-center">
           Read the docs
         </a>
       </div>
 
       <!-- Code pill showing npm install -->
-      <div class="mb-14 flex items-center gap-3 bg-[#1a2535] text-[#EEE5BC] px-5 py-3 border border-[#4289CB] font-mono text-sm max-w-full overflow-x-auto">
+      <div class="mb-16 flex items-center gap-3 bg-codebg text-butter px-5 py-3 border border-brand font-mono text-xs md:text-sm select-all">
+        <span class="text-brand font-bold select-none">&gt;</span>
         <span id="hero-npm-cmd">npm install @shellxyz/sdk</span>
-        <button onclick="copyToClipboard('hero-npm-cmd', this)" class="text-[#4289CB] hover:text-[#EEE5BC] transition-colors flex items-center justify-center p-0.5" title="Copy Code">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <button onclick="copyToClipboard('hero-npm-cmd', this)" class="text-brand hover:text-butter transition-colors ml-2 flex items-center justify-center p-0.5" title="Copy Package Command">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
           </svg>
         </button>
       </div>
 
       <!-- Large placeholder box centered -->
-      <div class="w-full max-w-3xl aspect-[3/2] border-2 border-dashed border-[#4289CB] bg-[#1a2535]/50 flex items-center justify-center p-6 select-none">
-        <span class="text-white font-mono text-xs md:text-sm uppercase tracking-wider font-extrabold text-center">
+      <div class="w-full max-w-3xl aspect-[16/10] border-2 border-dashed border-brand bg-codebg/40 flex items-center justify-center p-6 select-none">
+        <span class="text-butter/90 font-mono text-xs md:text-sm uppercase tracking-widest font-extrabold text-center">
           PRODUCT VISUAL — sandbox screenshot
         </span>
       </div>
@@ -81,64 +109,64 @@
   </section>
 
   <!-- SECTION 2 — STATS BAR (butter #EEE5BC) -->
-  <section class="bg-[#EEE5BC] border-y border-[#4289CB] py-12 px-6">
-    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-[#4289CB]">
+  <section class="bg-butter border-b border-brand py-12 px-6">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-brand">
       <!-- Stat 1 -->
       <div class="flex flex-col items-center text-center justify-center py-4 md:py-0 md:px-6">
-        <span class="text-5xl md:text-6xl font-extrabold text-[#111827] mb-2">5</span>
-        <span class="text-sm md:text-base font-bold text-[#4289CB] uppercase tracking-wider">security check layers</span>
+        <span class="text-5xl md:text-7xl font-serif font-black text-darknavy mb-2">5</span>
+        <span class="text-xs md:text-sm font-bold text-brand uppercase tracking-wider">security check layers</span>
       </div>
       <!-- Stat 2 -->
       <div class="flex flex-col items-center text-center justify-center py-4 md:py-0 md:px-6">
-        <span class="text-5xl md:text-6xl font-extrabold text-[#111827] mb-2">&lt; 1ms</span>
-        <span class="text-sm md:text-base font-bold text-[#4289CB] uppercase tracking-wider">local heuristic latency</span>
+        <span class="text-5xl md:text-7xl font-serif font-black text-darknavy mb-2">&lt; 1ms</span>
+        <span class="text-xs md:text-sm font-bold text-brand uppercase tracking-wider">local heuristic latency</span>
       </div>
       <!-- Stat 3 -->
       <div class="flex flex-col items-center text-center justify-center py-4 md:py-0 md:px-6">
-        <span class="text-5xl md:text-6xl font-extrabold text-[#111827] mb-2">0</span>
-        <span class="text-sm md:text-base font-bold text-[#4289CB] uppercase tracking-wider">bytes of user data transmitted</span>
+        <span class="text-5xl md:text-7xl font-serif font-black text-darknavy mb-2">0</span>
+        <span class="text-xs md:text-sm font-bold text-brand uppercase tracking-wider">bytes of user data transmitted</span>
       </div>
     </div>
   </section>
 
   <!-- SECTION 3 — STATEMENT + TWO CARDS (butter #EEE5BC) -->
-  <section id="why" class="bg-[#EEE5BC] text-[#111827] py-20 md:py-32 px-6 border-b border-[#4289CB]">
+  <section id="why" class="bg-butter text-darknavy py-20 md:py-32 px-6 border-b border-brand">
     <div class="max-w-6xl mx-auto">
-      <div class="text-center mb-16">
-        <span class="text-xs font-bold text-[#4289CB] tracking-widest uppercase block mb-3">WHY SHELL</span>
-        <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-[#111827] max-w-3xl mx-auto">
+      <div class="text-center mb-16 md:mb-24">
+        <span class="text-xs md:text-sm font-bold text-brand tracking-widest uppercase block mb-3">WHY SHELL</span>
+        <h2 class="text-3xl md:text-6xl font-serif font-black tracking-tight text-darknavy max-w-4xl mx-auto leading-none">
           Security that lives where transactions happen.
         </h2>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Card 1 (dark #111827 background) -->
-        <div class="bg-[#111827] text-[#EEE5BC] p-8 md:p-12 border border-[#4289CB] flex flex-col justify-between">
-          <div>
-            <span class="text-xs font-bold text-[#4289CB] tracking-wider uppercase block mb-4">THE PROBLEM</span>
-            <p class="text-base md:text-lg leading-relaxed mb-8 text-[#EEE5BC]/90 font-medium">
+        <div class="bg-darknavy text-butter p-8 md:p-12 border border-brand flex flex-col justify-between">
+          <div class="mb-10">
+            <span class="text-xs font-bold text-brand tracking-wider uppercase block mb-4">THE PROBLEM</span>
+            <p class="text-base md:text-xl leading-relaxed text-butter/95 font-medium">
               Browser extensions sit outside the wallet. Security warnings appear after approval. Separate apps users forget to open.
             </p>
           </div>
           <!-- Placeholder box -->
-          <div class="w-full aspect-[3/2] border-2 border-dashed border-[#4289CB] bg-[#1a2535] flex items-center justify-center p-4 select-none">
-            <span class="text-white font-mono text-xs uppercase tracking-wider font-extrabold text-center">
+          <div class="w-full aspect-[3/2] border-2 border-dashed border-brand bg-codebg flex items-center justify-center p-4 select-none">
+            <span class="text-butter/90 font-mono text-xs uppercase tracking-widest font-extrabold text-center">
               VISUAL — old way diagram
             </span>
           </div>
         </div>
 
         <!-- Card 2 (butter background, #4289CB border) -->
-        <div class="bg-[#EEE5BC] text-[#111827] p-8 md:p-12 border-2 border-[#4289CB] flex flex-col justify-between">
-          <div>
-            <span class="text-xs font-bold text-[#4289CB] tracking-wider uppercase block mb-4">SHELL</span>
-            <p class="text-base md:text-lg leading-relaxed mb-8 text-[#111827]/90 font-medium">
+        <div class="bg-butter text-darknavy p-8 md:p-12 border-2 border-brand flex flex-col justify-between">
+          <div class="mb-10">
+            <span class="text-xs font-bold text-brand tracking-wider uppercase block mb-4">SHELL</span>
+            <p class="text-base md:text-xl leading-relaxed text-darknavy/95 font-medium">
               Intercepts before confirmation. Reads what the transaction actually does. Always on — no setup per transaction.
             </p>
           </div>
           <!-- Placeholder box -->
-          <div class="w-full aspect-[3/2] border-2 border-dashed border-[#4289CB] bg-[#111827] flex items-center justify-center p-4 select-none">
-            <span class="text-white font-mono text-xs uppercase tracking-wider font-extrabold text-center">
+          <div class="w-full aspect-[3/2] border-2 border-dashed border-brand bg-darknavy flex items-center justify-center p-4 select-none">
+            <span class="text-butter/90 font-mono text-xs uppercase tracking-widest font-extrabold text-center">
               VISUAL — pipeline diagram
             </span>
           </div>
@@ -148,52 +176,52 @@
   </section>
 
   <!-- SECTION 4 — FEATURE SPLIT (dark #111827) -->
-  <section class="bg-[#111827] text-[#EEE5BC] py-20 md:py-32 px-6">
+  <section class="bg-darknavy text-butter py-20 md:py-32 px-6 border-b border-brand/20">
     <div class="max-w-6xl mx-auto">
-      <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-center mb-20 md:mb-28 max-w-3xl mx-auto">
+      <h2 class="text-3xl md:text-6xl font-serif font-black tracking-tight text-center mb-24 md:mb-32 max-w-4xl mx-auto leading-none">
         Shell is your pipeline's last line of defense.
       </h2>
 
-      <div class="space-y-24 md:space-y-36">
+      <div class="space-y-24 md:space-y-40">
         <!-- Row 1 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 items-center">
           <!-- Left Placeholder -->
-          <div class="w-full aspect-[4/3] border-2 border-dashed border-[#4289CB] bg-[#1a2535] flex items-center justify-center p-6 select-none">
-            <span class="text-white font-mono text-xs uppercase tracking-wider font-extrabold text-center">
+          <div class="w-full aspect-[4/3] border-2 border-dashed border-brand bg-codebg flex items-center justify-center p-6 select-none">
+            <span class="text-butter/90 font-mono text-xs uppercase tracking-widest font-extrabold text-center">
               VISUAL — away mode screen
             </span>
           </div>
           <!-- Right Content -->
           <div class="flex flex-col items-start">
-            <h3 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-4 text-[#EEE5BC]">
+            <h3 class="text-2xl md:text-4xl font-serif font-black tracking-tight mb-4 text-butter">
               Away Mode
             </h3>
-            <p class="text-sm md:text-base text-[#EEE5BC]/80 leading-relaxed mb-6">
+            <p class="text-sm md:text-base text-butter/85 leading-relaxed mb-6 font-medium">
               One toggle. Any background signing attempt — from rogue extensions or injected scripts — is blocked the moment you step away. State lives in memory. Nothing leaves your device.
             </p>
-            <a href="#docs-full" class="text-[#4289CB] font-extrabold hover:underline">
+            <a href="#docs-full" class="text-brand font-bold uppercase tracking-wider text-sm hover:underline flex items-center gap-1">
               Learn more &rarr;
             </a>
           </div>
         </div>
 
         <!-- Row 2 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
-          <!-- Left Placeholder -->
-          <div class="w-full aspect-[4/3] border-2 border-dashed border-[#4289CB] bg-[#1a2535] flex items-center justify-center p-6 select-none">
-            <span class="text-white font-mono text-xs uppercase tracking-wider font-extrabold text-center">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 items-center">
+          <!-- Left Placeholder (Alternating pattern on desktop is preserved by swapping visual on desktop) -->
+          <div class="w-full aspect-[4/3] border-2 border-dashed border-brand bg-codebg flex items-center justify-center p-6 select-none md:order-last">
+            <span class="text-butter/90 font-mono text-xs uppercase tracking-widest font-extrabold text-center">
               VISUAL — blocked transaction screen
             </span>
           </div>
           <!-- Right Content -->
           <div class="flex flex-col items-start">
-            <h3 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-4 text-[#EEE5BC]">
+            <h3 class="text-2xl md:text-4xl font-serif font-black tracking-tight mb-4 text-butter">
               Mimic Detection
             </h3>
-            <p class="text-sm md:text-base text-[#EEE5BC]/80 leading-relaxed mb-6">
+            <p class="text-sm md:text-base text-butter/85 leading-relaxed mb-6 font-medium">
               Shell catches addresses engineered to look like your contacts — matching first and last characters, substituting lookalike letters. The blockchain doesn't forgive typos. Shell doesn't either.
             </p>
-            <a href="#docs-full" class="text-[#4289CB] font-extrabold hover:underline">
+            <a href="#docs-full" class="text-brand font-bold uppercase tracking-wider text-sm hover:underline flex items-center gap-1">
               Learn more &rarr;
             </a>
           </div>
@@ -203,68 +231,68 @@
   </section>
 
   <!-- SECTION 5 — FEATURE GRID (butter #EEE5BC) -->
-  <section id="how-it-works" class="bg-[#EEE5BC] text-[#111827] py-20 md:py-32 px-6 border-y border-[#4289CB]">
+  <section id="how-it-works" class="bg-butter text-darknavy py-20 md:py-32 px-6 border-b border-brand">
     <div class="max-w-6xl mx-auto">
-      <div class="text-center mb-16 md:mb-20">
-        <span class="text-xs font-bold text-[#4289CB] tracking-widest uppercase block mb-3">WHAT SHELL CHECKS</span>
-        <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-[#111827]">
+      <div class="text-center mb-16 md:mb-24">
+        <span class="text-xs md:text-sm font-bold text-brand tracking-widest uppercase block mb-3">WHAT SHELL CHECKS</span>
+        <h2 class="text-3xl md:text-6xl font-serif font-black tracking-tight text-darknavy">
           Five layers. One import.
         </h2>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Card 1 -->
-        <div class="bg-white border-2 border-[#4289CB] rounded-[12px] p-8 flex flex-col items-start">
-          <div class="text-[#4289CB] mb-5">
+        <div class="bg-white border-2 border-brand rounded-[12px] p-8 md:p-10 flex flex-col items-start">
+          <div class="text-brand mb-6">
             <!-- Inline SVG Shield Icon -->
             <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"></path>
             </svg>
           </div>
-          <h3 class="text-lg md:text-xl font-extrabold text-[#111827] mb-2">Pipeline Intercept</h3>
-          <p class="text-sm text-[#111827]/80 leading-relaxed font-medium">
+          <h3 class="text-xl font-serif font-black text-darknavy mb-2">Pipeline Intercept</h3>
+          <p class="text-sm md:text-base text-darknavy/80 leading-relaxed font-medium">
             Plugs into the pre-flight handler before the user sees any confirmation screen.
           </p>
         </div>
 
         <!-- Card 2 -->
-        <div class="bg-white border-2 border-[#4289CB] rounded-[12px] p-8 flex flex-col items-start">
-          <div class="text-[#4289CB] mb-5">
+        <div class="bg-white border-2 border-brand rounded-[12px] p-8 md:p-10 flex flex-col items-start">
+          <div class="text-brand mb-6">
             <!-- Inline SVG Eye-off Icon -->
             <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.895 7.895L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"></path>
             </svg>
           </div>
-          <h3 class="text-lg md:text-xl font-extrabold text-[#111827] mb-2">Away Mode</h3>
-          <p class="text-sm text-[#111827]/80 leading-relaxed font-medium">
+          <h3 class="text-xl font-serif font-black text-darknavy mb-2">Away Mode</h3>
+          <p class="text-sm md:text-base text-darknavy/80 leading-relaxed font-medium">
             Blocks all background signing the moment the user goes idle.
           </p>
         </div>
 
         <!-- Card 3 -->
-        <div class="bg-white border-2 border-[#4289CB] rounded-[12px] p-8 flex flex-col items-start">
-          <div class="text-[#4289CB] mb-5">
+        <div class="bg-white border-2 border-brand rounded-[12px] p-8 md:p-10 flex flex-col items-start">
+          <div class="text-brand mb-6">
             <!-- Inline SVG Alert-triangle Icon -->
             <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path>
             </svg>
           </div>
-          <h3 class="text-lg md:text-xl font-extrabold text-[#111827] mb-2">Mimic Detection</h3>
-          <p class="text-sm text-[#111827]/80 leading-relaxed font-medium">
+          <h3 class="text-xl font-serif font-black text-darknavy mb-2">Mimic Detection</h3>
+          <p class="text-sm md:text-base text-darknavy/80 leading-relaxed font-medium">
             Heuristic and visual normalization checks against the wallet's contact list.
           </p>
         </div>
 
         <!-- Card 4 -->
-        <div class="bg-white border-2 border-[#4289CB] rounded-[12px] p-8 flex flex-col items-start">
-          <div class="text-[#4289CB] mb-5">
+        <div class="bg-white border-2 border-brand rounded-[12px] p-8 md:p-10 flex flex-col items-start">
+          <div class="text-brand mb-6">
             <!-- Inline SVG Zap Icon -->
             <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"></path>
             </svg>
           </div>
-          <h3 class="text-lg md:text-xl font-extrabold text-[#111827] mb-2">On-chain Verify</h3>
-          <p class="text-sm text-[#111827]/80 leading-relaxed font-medium">
+          <h3 class="text-xl font-serif font-black text-darknavy mb-2">On-chain Verify</h3>
+          <p class="text-sm md:text-base text-darknavy/80 leading-relaxed font-medium">
             Queries Solana mainnet RPC for account age and program flags.
           </p>
         </div>
@@ -273,24 +301,24 @@
   </section>
 
   <!-- SECTION 6 — DARK CTA (dark #111827) -->
-  <section id="install" class="bg-[#111827] text-[#EEE5BC] py-20 md:py-32 px-6">
+  <section id="install" class="bg-darknavy text-butter py-20 md:py-32 px-6 border-b border-brand/20">
     <div class="max-w-4xl mx-auto text-center flex flex-col items-center">
-      <span class="text-xs font-bold text-[#4289CB] tracking-widest uppercase block mb-3">FOR WALLET ENGINEERS</span>
-      <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-8">
+      <span class="text-xs md:text-sm font-bold text-brand tracking-widest uppercase block mb-3">FOR WALLET ENGINEERS</span>
+      <h2 class="text-3xl md:text-6xl font-serif font-black tracking-tight mb-8 leading-none">
         One import. Full pipeline protection.
       </h2>
 
       <!-- Compact custom terminal style window -->
-      <div class="w-full text-left rounded-none border border-[#4289CB] overflow-hidden mb-10">
-        <div class="bg-[#1a2535] border-b border-[#4289CB]/30 px-4 py-3 flex items-center justify-between">
+      <div class="w-full text-left rounded-none border border-brand/30 overflow-hidden mb-10">
+        <div class="bg-codebg border-b border-brand/20 px-4 py-3 flex items-center justify-between">
           <div class="flex gap-1.5">
             <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
             <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
             <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
           </div>
-          <span class="text-xs font-mono font-bold text-[#EEE5BC]/65">example-integration.ts</span>
+          <span class="text-xs font-mono font-bold text-butter/65">example-integration.ts</span>
         </div>
-        <div class="bg-[#1a2535] p-5 font-mono text-xs md:text-sm text-[#EEE5BC] overflow-x-auto relative">
+        <div class="bg-codebg p-5 font-mono text-xs md:text-sm text-butter overflow-x-auto relative">
           <pre><code id="cta-code-block" class="whitespace-pre">import ShellSDK from '@shellxyz/sdk'
 
 ShellSDK.init({
@@ -306,108 +334,109 @@ const result = await ShellSDK.analyzeTransaction({
 
 if (result.blocked) return wallet.reject(result.reason)
 if (result.requiresPIN) return wallet.triggerPIN()</code></pre>
-          <button onclick="copyToClipboard('cta-code-block', this)" class="absolute top-4 right-4 text-[#4289CB] hover:text-[#EEE5BC] bg-white/5 hover:bg-white/10 p-2 border border-[#4289CB]/20 transition-colors" title="Copy Code">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <button onclick="copyToClipboard('cta-code-block', this)" class="absolute top-4 right-4 text-brand hover:text-butter bg-white/5 hover:bg-white/10 p-2 border border-brand/20 transition-colors" title="Copy Code">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
             </svg>
           </button>
         </div>
       </div>
 
-      <a href="#docs-full" class="px-8 py-4 bg-[#4289CB] text-[#EEE5BC] font-extrabold text-lg rounded-none hover:opacity-90 transition-opacity">
+      <a href="#docs-full" class="px-8 py-4 bg-brand text-butter font-bold text-base tracking-wider uppercase hover:opacity-95 transition-opacity">
         Read integration guide &rarr;
       </a>
     </div>
   </section>
 
   <!-- SECTION 7 — OPEN SOURCE (butter #EEE5BC) -->
-  <section class="bg-[#EEE5BC] text-[#111827] py-20 md:py-32 px-6 border-y border-[#4289CB]">
+  <section class="bg-butter text-darknavy py-20 md:py-32 px-6 border-b border-brand">
     <div class="max-w-6xl mx-auto">
-      <div class="text-center mb-16 md:mb-20">
-        <span class="text-xs font-bold text-[#4289CB] tracking-widest uppercase block mb-3">OPEN SOURCE</span>
-        <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-[#111827]">
+      <div class="text-center mb-16 md:mb-24">
+        <span class="text-xs md:text-sm font-bold text-brand tracking-widest uppercase block mb-3">OPEN SOURCE</span>
+        <h2 class="text-3xl md:text-6xl font-serif font-black tracking-tight text-darknavy">
           Built in the open. MIT licensed.
         </h2>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <!-- Tile 1 -->
-        <a href="https://github.com/zarkbns/shell" target="_blank" rel="noopener noreferrer" class="bg-white border-2 border-[#4289CB] p-8 hover:-translate-y-1 transition-transform duration-200 block">
-          <div class="text-[#4289CB] mb-4">
+        <a href="https://github.com/zarkbns/shell" target="_blank" rel="noopener noreferrer" class="bg-white border border-brand p-8 hover:-translate-y-1 transition-transform duration-200 block">
+          <div class="text-brand mb-5">
             <!-- Inline SVG GitHub Icon -->
             <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.024A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.293 2.747-1.024 2.747-1.024.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.579.688.481C19.137 20.162 22 16.418 22 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path>
             </svg>
           </div>
-          <h3 class="text-lg font-extrabold mb-2 text-[#111827]">Source code</h3>
-          <p class="text-sm text-[#111827]/70 leading-relaxed mb-4">
+          <h3 class="text-xl font-serif font-black text-darknavy mb-2">Source code</h3>
+          <p class="text-sm text-darknavy/75 leading-relaxed mb-6 font-medium">
             Full codebase on GitHub. Fork it, audit it, contribute.
           </p>
-          <span class="text-sm font-bold text-[#4289CB] hover:underline block">github.com/zarkbns/shell &rarr;</span>
+          <span class="text-xs font-bold text-brand uppercase tracking-wider block">github.com/zarkbns/shell &rarr;</span>
         </a>
 
         <!-- Tile 2 -->
-        <a href="#docs-full" class="bg-white border-2 border-[#4289CB] p-8 hover:-translate-y-1 transition-transform duration-200 block">
-          <div class="text-[#4289CB] mb-4">
+        <a href="#docs-full" class="bg-white border border-brand p-8 hover:-translate-y-1 transition-transform duration-200 block">
+          <div class="text-brand mb-5">
             <!-- Inline SVG Book Icon -->
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"></path>
             </svg>
           </div>
-          <h3 class="text-lg font-extrabold mb-2 text-[#111827]">Documentation</h3>
-          <p class="text-sm text-[#111827]/70 leading-relaxed mb-4">
+          <h3 class="text-xl font-serif font-black text-darknavy mb-2">Documentation</h3>
+          <p class="text-sm text-darknavy/75 leading-relaxed mb-6 font-medium">
             Integration guide, API reference, FAQ.
           </p>
-          <span class="text-sm font-bold text-[#4289CB] hover:underline block">GitBook docs &rarr;</span>
+          <span class="text-xs font-bold text-brand uppercase tracking-wider block">GitBook docs &rarr;</span>
         </a>
 
         <!-- Tile 3 -->
-        <a href="https://www.npmjs.com/package/@shellxyz/sdk" target="_blank" rel="noopener noreferrer" class="bg-white border-2 border-[#4289CB] p-8 hover:-translate-y-1 transition-transform duration-200 block">
-          <div class="text-[#4289CB] mb-4">
+        <a href="https://www.npmjs.com/package/@shellxyz/sdk" target="_blank" rel="noopener noreferrer" class="bg-white border border-brand p-8 hover:-translate-y-1 transition-transform duration-200 block">
+          <div class="text-brand mb-5">
             <!-- Inline SVG Package Icon -->
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"></path>
             </svg>
           </div>
-          <h3 class="text-lg font-extrabold mb-2 text-[#111827]">npm package</h3>
-          <p class="text-sm text-[#111827]/70 leading-relaxed mb-4">
+          <h3 class="text-xl font-serif font-black text-darknavy mb-2">npm package</h3>
+          <p class="text-sm text-darknavy/75 leading-relaxed mb-6 font-medium">
             @shellxyz/sdk on npm. One install.
           </p>
-          <span class="text-sm font-bold text-[#4289CB] hover:underline block">npmjs.com/package/@shellxyz/sdk &rarr;</span>
+          <span class="text-xs font-bold text-brand uppercase tracking-wider block">npmjs.com/package/@shellxyz/sdk &rarr;</span>
         </a>
       </div>
     </div>
   </section>
 
-  <!-- SECTION 4B: DETAILED INTEGRATION GUIDE (docs-full) -->
-  <section id="docs-full" class="bg-[#EEE5BC] text-[#111827] py-20 md:py-32 px-6 border-b border-[#4289CB]">
+  <!-- SECTION 7B — DETAILED INTEGRATION GUIDE / DOCS (butter #EEE5BC) -->
+  <section id="docs-full" class="bg-butter text-darknavy py-20 md:py-32 px-6 border-b border-brand">
     <div class="max-w-4xl mx-auto">
-      <div class="text-center mb-16 md:mb-20">
-        <span class="text-xs font-bold text-[#4289CB] tracking-widest uppercase block mb-3">DOCUMENTATION</span>
-        <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-[#111827]">
+      <div class="text-center mb-16 md:mb-24">
+        <span class="text-xs md:text-sm font-bold text-brand tracking-widest uppercase block mb-3">DOCUMENTATION</span>
+        <h2 class="text-3xl md:text-6xl font-serif font-black tracking-tight text-darknavy leading-none">
           Integration guide
         </h2>
       </div>
 
       <div class="space-y-16">
-        <!-- Subsection 5a -->
+        <!-- 5a. Install -->
         <div class="space-y-4">
-          <h3 class="text-xl md:text-2xl font-extrabold text-[#111827] flex items-center gap-2">
-            <span class="text-xs bg-[#4289CB] text-[#EEE5BC] px-2 py-1 font-mono">1</span> Install
+          <h3 class="text-lg md:text-xl font-bold text-darknavy uppercase tracking-wide flex items-center gap-3">
+            <span class="w-6 h-6 flex items-center justify-center bg-brand text-butter font-mono text-xs font-bold">A</span>
+            Install
           </h3>
-          <div class="flex flex-col border border-[#4289CB] overflow-hidden">
-            <div class="bg-[#1a2535] border-b border-[#4289CB]/20 px-4 py-3 flex items-center justify-between">
+          <div class="flex flex-col border border-brand overflow-hidden">
+            <div class="bg-codebg border-b border-brand/20 px-4 py-3 flex items-center justify-between">
               <div class="flex gap-1.5">
                 <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
                 <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
                 <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
               </div>
-              <span class="text-xs font-mono font-bold text-[#EEE5BC]/65">Terminal</span>
+              <span class="text-xs font-mono font-bold text-butter/65">Terminal</span>
             </div>
-            <div class="bg-[#1a2535] p-5 font-mono text-xs md:text-sm text-[#EEE5BC] overflow-x-auto relative min-h-[80px] flex items-center">
+            <div class="bg-codebg p-5 font-mono text-xs md:text-sm text-butter overflow-x-auto relative min-h-[80px] flex items-center">
               <pre class="w-full"><code id="code-full-install" class="whitespace-pre-wrap">npm install @shellxyz/sdk</code></pre>
-              <button onclick="copyToClipboard('code-full-install', this)" class="absolute top-3 right-3 text-[#4289CB] hover:text-[#EEE5BC] bg-white/5 hover:bg-white/10 p-1.5 transition-colors" title="Copy Code">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <button onclick="copyToClipboard('code-full-install', this)" class="absolute top-3 right-3 text-brand hover:text-butter bg-white/5 hover:bg-white/10 p-1.5 transition-colors" title="Copy Code">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
                 </svg>
               </button>
@@ -415,29 +444,30 @@ if (result.requiresPIN) return wallet.triggerPIN()</code></pre>
           </div>
         </div>
 
-        <!-- Subsection 5b -->
+        <!-- 5b. Initialize inside your wallet client -->
         <div class="space-y-4">
-          <h3 class="text-xl md:text-2xl font-extrabold text-[#111827] flex items-center gap-2">
-            <span class="text-xs bg-[#4289CB] text-[#EEE5BC] px-2 py-1 font-mono">2</span> Initialize inside your wallet client
+          <h3 class="text-lg md:text-xl font-bold text-darknavy uppercase tracking-wide flex items-center gap-3">
+            <span class="w-6 h-6 flex items-center justify-center bg-brand text-butter font-mono text-xs font-bold">B</span>
+            Initialize inside your wallet client
           </h3>
-          <div class="flex flex-col border border-[#4289CB] overflow-hidden">
-            <div class="bg-[#1a2535] border-b border-[#4289CB]/20 px-4 py-3 flex items-center justify-between">
+          <div class="flex flex-col border border-brand overflow-hidden">
+            <div class="bg-codebg border-b border-brand/20 px-4 py-3 flex items-center justify-between">
               <div class="flex gap-1.5">
                 <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
                 <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
                 <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
               </div>
-              <span class="text-xs font-mono font-bold text-[#EEE5BC]/65">setup.ts</span>
+              <span class="text-xs font-mono font-bold text-butter/65">setup.ts</span>
             </div>
-            <div class="bg-[#1a2535] p-5 font-mono text-xs md:text-sm text-[#EEE5BC] overflow-x-auto relative">
+            <div class="bg-codebg p-5 font-mono text-xs md:text-sm text-butter overflow-x-auto relative">
               <pre class="w-full"><code id="code-full-init" class="whitespace-pre">import ShellSDK from '@shellxyz/sdk'
 
 ShellSDK.init({
   contactList: walletClient.getSavedAddresses(),
   solThreshold: 10
 })</code></pre>
-              <button onclick="copyToClipboard('code-full-init', this)" class="absolute top-3 right-3 text-[#4289CB] hover:text-[#EEE5BC] bg-white/5 hover:bg-white/10 p-1.5 transition-colors" title="Copy Code">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <button onclick="copyToClipboard('code-full-init', this)" class="absolute top-3 right-3 text-brand hover:text-butter bg-white/5 hover:bg-white/10 p-1.5 transition-colors" title="Copy Code">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
                 </svg>
               </button>
@@ -445,21 +475,22 @@ ShellSDK.init({
           </div>
         </div>
 
-        <!-- Subsection 5c -->
+        <!-- 5c. Intercept transactions before signing -->
         <div class="space-y-4">
-          <h3 class="text-xl md:text-2xl font-extrabold text-[#111827] flex items-center gap-2">
-            <span class="text-xs bg-[#4289CB] text-[#EEE5BC] px-2 py-1 font-mono">3</span> Intercept transactions before signing
+          <h3 class="text-lg md:text-xl font-bold text-darknavy uppercase tracking-wide flex items-center gap-3">
+            <span class="w-6 h-6 flex items-center justify-center bg-brand text-butter font-mono text-xs font-bold">C</span>
+            Intercept transactions before signing
           </h3>
-          <div class="flex flex-col border border-[#4289CB] overflow-hidden">
-            <div class="bg-[#1a2535] border-b border-[#4289CB]/20 px-4 py-3 flex items-center justify-between">
+          <div class="flex flex-col border border-brand overflow-hidden">
+            <div class="bg-codebg border-b border-brand/20 px-4 py-3 flex items-center justify-between">
               <div class="flex gap-1.5">
                 <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
                 <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
                 <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
               </div>
-              <span class="text-xs font-mono font-bold text-[#EEE5BC]/65">interceptor.ts</span>
+              <span class="text-xs font-mono font-bold text-butter/65">interceptor.ts</span>
             </div>
-            <div class="bg-[#1a2535] p-5 font-mono text-xs md:text-sm text-[#EEE5BC] overflow-x-auto relative">
+            <div class="bg-codebg p-5 font-mono text-xs md:text-sm text-butter overflow-x-auto relative">
               <pre class="w-full"><code id="code-full-intercept" class="whitespace-pre">async function onTransactionRequest(tx) {
   const result = await ShellSDK.analyzeTransaction({
     address: tx.destination,
@@ -471,8 +502,8 @@ ShellSDK.init({
   if (result.requiresPIN) return wallet.triggerPIN()
   return wallet.proceedToSign(tx)
 }</code></pre>
-              <button onclick="copyToClipboard('code-full-intercept', this)" class="absolute top-3 right-3 text-[#4289CB] hover:text-[#EEE5BC] bg-white/5 hover:bg-white/10 p-1.5 transition-colors" title="Copy Code">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <button onclick="copyToClipboard('code-full-intercept', this)" class="absolute top-3 right-3 text-brand hover:text-butter bg-white/5 hover:bg-white/10 p-1.5 transition-colors" title="Copy Code">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
                 </svg>
               </button>
@@ -480,21 +511,22 @@ ShellSDK.init({
           </div>
         </div>
 
-        <!-- Subsection 5d -->
+        <!-- 5d. Deep decode — read what the transaction actually does -->
         <div class="space-y-4">
-          <h3 class="text-xl md:text-2xl font-extrabold text-[#111827] flex items-center gap-2">
-            <span class="text-xs bg-[#4289CB] text-[#EEE5BC] px-2 py-1 font-mono">4</span> Deep decode — read what the transaction actually does
+          <h3 class="text-lg md:text-xl font-bold text-darknavy uppercase tracking-wide flex items-center gap-3">
+            <span class="w-6 h-6 flex items-center justify-center bg-brand text-butter font-mono text-xs font-bold">D</span>
+            Deep decode — read what the transaction actually does
           </h3>
-          <div class="flex flex-col border border-[#4289CB] overflow-hidden">
-            <div class="bg-[#1a2535] border-b border-[#4289CB]/20 px-4 py-3 flex items-center justify-between">
+          <div class="flex flex-col border border-brand overflow-hidden">
+            <div class="bg-codebg border-b border-brand/20 px-4 py-3 flex items-center justify-between">
               <div class="flex gap-1.5">
                 <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
                 <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
                 <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
               </div>
-              <span class="text-xs font-mono font-bold text-[#EEE5BC]/65">decoder.ts</span>
+              <span class="text-xs font-mono font-bold text-butter/65">decoder.ts</span>
             </div>
-            <div class="bg-[#1a2535] p-5 font-mono text-xs md:text-sm text-[#EEE5BC] overflow-x-auto relative">
+            <div class="bg-codebg p-5 font-mono text-xs md:text-sm text-butter overflow-x-auto relative">
               <pre class="w-full"><code id="code-full-decode" class="whitespace-pre">const decoded = await ShellSDK.decodeAndAnalyze({
   serializedTransaction: tx.serialized,
   encoding: 'base64',
@@ -505,8 +537,8 @@ ShellSDK.init({
 if (decoded.containsUnknownPrograms) {
   wallet.showWarning(decoded.warning)
 }</code></pre>
-              <button onclick="copyToClipboard('code-full-decode', this)" class="absolute top-3 right-3 text-[#4289CB] hover:text-[#EEE5BC] bg-white/5 hover:bg-white/10 p-1.5 transition-colors" title="Copy Code">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <button onclick="copyToClipboard('code-full-decode', this)" class="absolute top-3 right-3 text-brand hover:text-butter bg-white/5 hover:bg-white/10 p-1.5 transition-colors" title="Copy Code">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
                 </svg>
               </button>
@@ -514,29 +546,30 @@ if (decoded.containsUnknownPrograms) {
           </div>
         </div>
 
-        <!-- Subsection 5e -->
+        <!-- 5e. Away Mode — block background signing -->
         <div class="space-y-4">
-          <h3 class="text-xl md:text-2xl font-extrabold text-[#111827] flex items-center gap-2">
-            <span class="text-xs bg-[#4289CB] text-[#EEE5BC] px-2 py-1 font-mono">5</span> Away Mode — block background signing
+          <h3 class="text-lg md:text-xl font-bold text-darknavy uppercase tracking-wide flex items-center gap-3">
+            <span class="w-6 h-6 flex items-center justify-center bg-brand text-butter font-mono text-xs font-bold">E</span>
+            Away Mode — block background signing
           </h3>
-          <div class="flex flex-col border border-[#4289CB] overflow-hidden">
-            <div class="bg-[#1a2535] border-b border-[#4289CB]/20 px-4 py-3 flex items-center justify-between">
+          <div class="flex flex-col border border-brand overflow-hidden">
+            <div class="bg-codebg border-b border-brand/20 px-4 py-3 flex items-center justify-between">
               <div class="flex gap-1.5">
                 <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
                 <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
                 <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
               </div>
-              <span class="text-xs font-mono font-bold text-[#EEE5BC]/65">awayMode.ts</span>
+              <span class="text-xs font-mono font-bold text-butter/65">awayMode.ts</span>
             </div>
-            <div class="bg-[#1a2535] p-5 font-mono text-xs md:text-sm text-[#EEE5BC] overflow-x-auto relative">
+            <div class="bg-codebg p-5 font-mono text-xs md:text-sm text-butter overflow-x-auto relative">
               <pre class="w-full"><code id="code-full-away" class="whitespace-pre">// User locks their screen or goes idle
 ShellSDK.setAwayMode(true)
 
 // Any background signing attempt is blocked instantly
 // Re-enable when user returns
 ShellSDK.setAwayMode(false)</code></pre>
-              <button onclick="copyToClipboard('code-full-away', this)" class="absolute top-3 right-3 text-[#4289CB] hover:text-[#EEE5BC] bg-white/5 hover:bg-white/10 p-1.5 transition-colors" title="Copy Code">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <button onclick="copyToClipboard('code-full-away', this)" class="absolute top-3 right-3 text-brand hover:text-butter bg-white/5 hover:bg-white/10 p-1.5 transition-colors" title="Copy Code">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
                 </svg>
               </button>
@@ -548,76 +581,88 @@ ShellSDK.setAwayMode(false)</code></pre>
   </section>
 
   <!-- SECTION 8 — CLOSING HERO (dark #111827) -->
-  <section class="min-h-screen bg-[#111827] flex flex-col items-center justify-center text-center px-6">
+  <section class="min-h-screen bg-darknavy flex flex-col items-center justify-center text-center px-6">
     <div class="max-w-4xl mx-auto flex flex-col items-center">
-      <h2 class="text-5xl md:text-8xl font-extrabold tracking-tight text-[#EEE5BC] mb-4">
+      <!-- Solflare flag style centered display element -->
+      <div class="w-32 h-32 border-2 border-brand bg-codebg/30 flex items-center justify-center mb-8 rotate-45 transform">
+        <span class="text-3xl font-serif font-black text-brand -rotate-45">S</span>
+      </div>
+      
+      <h2 class="text-4xl md:text-8xl font-serif font-black tracking-tight text-butter mb-6 leading-none">
         In every transaction<br>a decision.
       </h2>
-      <p class="text-xl md:text-3xl font-extrabold text-[#4289CB] uppercase tracking-wider mb-12">
+      <p class="text-lg md:text-3xl font-serif font-bold text-brand uppercase tracking-widest mb-12">
         Make it secure.
       </p>
-      <a href="#install" class="px-10 py-5 bg-[#4289CB] text-[#EEE5BC] font-extrabold text-xl rounded-none hover:opacity-90 transition-opacity">
+      <a href="#install" class="px-10 py-5 bg-brand text-butter font-bold text-lg tracking-wider uppercase hover:opacity-90 transition-opacity">
         Get started &rarr;
       </a>
     </div>
   </section>
 
   <!-- FOOTER (dark #111827) -->
-  <footer class="bg-[#111827] border-t border-[#4289CB] py-16 px-6 md:px-12 text-[#EEE5BC]">
-    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+  <footer class="bg-darknavy border-t border-brand/30 py-20 px-6 md:px-12 text-butter">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
       <!-- Col 1 -->
       <div class="flex flex-col">
-        <span class="text-2xl font-extrabold text-[#4289CB] mb-4">Shell</span>
-        <p class="text-sm text-[#EEE5BC]/70 leading-relaxed font-medium">
-          Native wallet security for Solana.
+        <span class="text-3xl font-serif font-black text-brand mb-4">Shell</span>
+        <p class="text-sm text-butter/70 leading-relaxed font-medium">
+          Native wallet security for Solana. Built to block threats natively.
         </p>
       </div>
 
       <!-- Col 2 -->
       <div>
-        <h4 class="text-xs font-bold text-[#4289CB] tracking-widest uppercase mb-4">Product</h4>
-        <ul class="space-y-3 text-sm text-[#EEE5BC]/70 font-semibold">
-          <li><a href="#how-it-works" class="hover:text-[#4289CB] transition-colors">How it works</a></li>
-          <li><a href="#why" class="hover:text-[#4289CB] transition-colors">Why Shell</a></li>
-          <li><a href="#install" class="hover:text-[#4289CB] transition-colors">Install</a></li>
+        <h4 class="text-xs font-bold text-brand tracking-widest uppercase mb-5">Product</h4>
+        <ul class="space-y-3 text-sm text-butter/75 font-semibold">
+          <li><a href="#how-it-works" class="hover:text-brand transition-colors">How it works</a></li>
+          <li><a href="#why" class="hover:text-brand transition-colors">Why Shell</a></li>
+          <li><a href="#install" class="hover:text-brand transition-colors">Install</a></li>
         </ul>
       </div>
 
       <!-- Col 3 -->
       <div>
-        <h4 class="text-xs font-bold text-[#4289CB] tracking-widest uppercase mb-4">Developers</h4>
-        <ul class="space-y-3 text-sm text-[#EEE5BC]/70 font-semibold">
-          <li><a href="https://github.com/zarkbns/shell" target="_blank" rel="noopener noreferrer" class="hover:text-[#4289CB] transition-colors">GitHub</a></li>
-          <li><a href="https://www.npmjs.com/package/@shellxyz/sdk" target="_blank" rel="noopener noreferrer" class="hover:text-[#4289CB] transition-colors">npm</a></li>
-          <li><a href="#docs-full" class="hover:text-[#4289CB] transition-colors">Integration guide</a></li>
-          <li><a href="#docs-full" class="hover:text-[#4289CB] transition-colors">API reference</a></li>
+        <h4 class="text-xs font-bold text-brand tracking-widest uppercase mb-5">Developers</h4>
+        <ul class="space-y-3 text-sm text-butter/75 font-semibold">
+          <li><a href="https://github.com/zarkbns/shell" target="_blank" rel="noopener noreferrer" class="hover:text-brand transition-colors">GitHub</a></li>
+          <li><a href="https://www.npmjs.com/package/@shellxyz/sdk" target="_blank" rel="noopener noreferrer" class="hover:text-brand transition-colors">npm Registry</a></li>
+          <li><a href="#docs-full" class="hover:text-brand transition-colors">Integration guide</a></li>
+          <li><a href="#docs-full" class="hover:text-brand transition-colors">API reference</a></li>
         </ul>
       </div>
 
       <!-- Col 4 -->
       <div>
-        <h4 class="text-xs font-bold text-[#4289CB] tracking-widest uppercase mb-4">Built by</h4>
-        <ul class="space-y-3 text-sm text-[#EEE5BC]/70 font-semibold">
-          <li><a href="https://x.com" target="_blank" rel="noopener noreferrer" class="hover:text-[#4289CB] transition-colors">@xark on X</a></li>
+        <h4 class="text-xs font-bold text-brand tracking-widest uppercase mb-5">Built by</h4>
+        <ul class="space-y-3 text-sm text-butter/75 font-semibold">
+          <li><a href="https://x.com" target="_blank" rel="noopener noreferrer" class="hover:text-brand transition-colors">@xark on X</a></li>
         </ul>
       </div>
     </div>
 
-    <!-- Bottom line -->
-    <div class="max-w-6xl mx-auto border-t border-[#4289CB]/20 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-bold text-[#EEE5BC]/50 uppercase tracking-widest">
-      <span>Shell SDK v0.1.0</span>
-      <span>MIT License</span>
+    <!-- Giant Solflare-style Yellow Footer Brand Accent -->
+    <div class="max-w-6xl mx-auto border-t border-brand/20 pt-16 pb-6 flex flex-col items-center text-center">
+      <span class="text-[clamp(3.5rem,15vw,10rem)] font-serif font-black text-brand select-none leading-none tracking-tighter mb-4">
+        Shell
+      </span>
+      <p class="text-xs md:text-sm font-bold text-brand uppercase tracking-[0.4em] mb-12">
+        THE SHIELD OF THE FREE • EST 2026
+      </p>
+      <p class="text-xs font-mono font-bold text-butter/45 uppercase tracking-widest">
+        Shell SDK v0.1.0 • MIT License • &copy; 2026 SHELL.
+      </p>
     </div>
   </footer>
 
   <!-- Toast Notification Overlay -->
-  <div id="toast" class="toast fixed bottom-6 right-6 bg-[#4289CB] text-[#EEE5BC] px-4 py-3 font-mono text-xs font-bold border border-[#EEE5BC]/20 opacity-0 pointer-events-none select-none">
+  <div id="toast" class="fixed bottom-6 right-6 bg-brand text-butter px-5 py-3 font-mono text-xs font-bold tracking-widest opacity-0 transform translate-y-2 pointer-events-none transition-all duration-300 z-50 border border-butter/10">
     COPIED TO CLIPBOARD
   </div>
 
   <!-- SCRIPTS -->
   <script>
-    // ClipBoard copy functionality with customized notification visual
+    // Copy code snippet helper with micro-feedback
     function copyToClipboard(elementId, btn) {
       const codeElement = document.getElementById(elementId);
       const text = codeElement.innerText || codeElement.textContent;
@@ -625,21 +670,21 @@ ShellSDK.setAwayMode(false)</code></pre>
       navigator.clipboard.writeText(text).then(() => {
         const toast = document.getElementById('toast');
         
-        // Show flat notification toast
-        toast.style.opacity = '1';
-        toast.style.transform = 'translateY(0)';
+        // Toast message overlay
+        toast.classList.remove('opacity-0', 'translate-y-2');
+        toast.classList.add('opacity-100', 'translate-y-0');
         
-        // Temporarily modify trigger button to provide instant interactive indicator
+        // Interactive visual button change
         const originalHTML = btn.innerHTML;
         btn.innerHTML = `
-          <svg class="w-4 h-4 text-[#27c93f]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <svg class="w-4 h-4 text-[#27c93f]" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>
           </svg>
         `;
 
         setTimeout(() => {
-          toast.style.opacity = '0';
-          toast.style.transform = 'translateY(8px)';
+          toast.classList.remove('opacity-100', 'translate-y-0');
+          toast.classList.add('opacity-0', 'translate-y-2');
           btn.innerHTML = originalHTML;
         }, 1500);
       }).catch(err => {
@@ -647,13 +692,13 @@ ShellSDK.setAwayMode(false)</code></pre>
       });
     }
 
-    // Dynamic sticky navbar styling check on scroll
+    // Dynamic sticky navbar visual border weight on scroll
     window.addEventListener('scroll', () => {
       const header = document.getElementById('navbar');
-      if (window.scrollY > 10) {
-        header.classList.add('border-b-2');
+      if (window.scrollY > 20) {
+        header.classList.add('border-b-2', 'border-brand');
       } else {
-        header.classList.remove('border-b-2');
+        header.classList.remove('border-b-2', 'border-brand');
       }
     });
   </script>
