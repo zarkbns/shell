@@ -42,9 +42,10 @@
   <header class="sticky top-0 z-50 bg-cream border-b border-brand w-full py-4 px-6 md:px-12 flex justify-between items-center">
     <a href="#home" class="text-xl font-extrabold tracking-tight hover:opacity-85 transition-opacity">Shell</a>
     <nav class="flex items-center gap-6 md:gap-8 font-semibold text-sm">
+      <a href="#why" class="hover:underline">Why Shell</a>
       <a href="#how-it-works" class="hover:underline">How it works</a>
-      <a href="#docs" class="hover:underline">Docs</a>
-      <a href="#docs" class="hover:underline">Install</a>
+      <a href="#docs-full" class="hover:underline">Docs</a>
+      <a href="#install" class="hover:underline">Install</a>
     </nav>
   </header>
 
@@ -72,6 +73,78 @@
           <button onclick="copyToClipboard('code-pill', this)" class="text-cream/70 hover:text-cream transition-colors flex items-center justify-center p-0.5" title="Copy Package Command">
             <i data-lucide="copy" class="w-4 h-4"></i>
           </button>
+        </div>
+      </div>
+
+      <!-- Try the Sandbox Button -->
+      <div class="mt-6">
+        <a href="/" class="px-6 py-3 border-2 border-brand text-brand hover:bg-brand hover:text-cream transition-colors font-bold rounded-lg text-sm inline-flex items-center gap-2">
+          Try the sandbox &rarr;
+        </a>
+      </div>
+    </section>
+
+    <!-- SECTION: WHY SHELL -->
+    <section id="why" class="border-t border-brand py-20 bg-cream">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-center mb-16">
+          The problem with wallet security today
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Left Column - The old way -->
+          <div class="bg-[#FFF5F5] border border-red-400 rounded-[12px] p-8 flex flex-col justify-between">
+            <div>
+              <h3 class="text-2xl font-extrabold text-red-600 mb-6 flex items-center gap-2">
+                <i data-lucide="alert-circle" class="w-6 h-6"></i> The old way
+              </h3>
+              <ul class="space-y-4 font-medium text-red-700">
+                <li class="flex items-start gap-3">
+                  <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+                  <span>Browser extensions that sit outside the wallet</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+                  <span>Security warnings that appear after approval</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+                  <span>Separate apps users have to remember to open</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+                  <span>No awareness of what a transaction actually does</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Right Column - Shell -->
+          <div class="bg-[#F4F9FD] border border-brand rounded-[12px] p-8 flex flex-col justify-between">
+            <div>
+              <h3 class="text-2xl font-extrabold text-brand mb-6 flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-6 h-6"></i> Shell
+              </h3>
+              <ul class="space-y-4 font-medium text-brand">
+                <li class="flex items-start gap-3">
+                  <i data-lucide="check-circle-2" class="w-5 h-5 shrink-0 mt-0.5 text-brand"></i>
+                  <span>Lives inside the signing pipeline, not beside it</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <i data-lucide="check-circle-2" class="w-5 h-5 shrink-0 mt-0.5 text-brand"></i>
+                  <span>Intercepts before the user sees the confirmation</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <i data-lucide="check-circle-2" class="w-5 h-5 shrink-0 mt-0.5 text-brand"></i>
+                  <span>Always on &mdash; no setup per transaction</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <i data-lucide="check-circle-2" class="w-5 h-5 shrink-0 mt-0.5 text-brand"></i>
+                  <span>Reads instruction data to know what the tx actually does</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -131,8 +204,8 @@
       </div>
     </section>
 
-    <!-- SECTION 3: INSTALL/DOCS -->
-    <section id="docs" class="border-t border-brand py-20 bg-cream">
+    <!-- SECTION 3: INSTALL -->
+    <section id="install" class="border-t border-brand py-20 bg-cream">
       <div class="max-w-6xl mx-auto px-6">
         <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-center mb-16">
           Get started
@@ -205,25 +278,156 @@ if (result.requiresPIN) triggerPINChallenge()</code></pre>
             </div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <!-- Documentation Link Reference -->
-        <div class="mt-14 text-center">
-          <a href="../docs/integration.md" class="font-extrabold text-brand hover:underline inline-flex items-center gap-1.5">
-            Full integration guide → docs/integration.md
-          </a>
+    <!-- SECTION 4: DETAILED INTEGRATION GUIDE -->
+    <section id="docs-full" class="border-t border-brand py-20 bg-cream">
+      <div class="max-w-4xl mx-auto px-6">
+        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-center mb-16">
+          Integration guide
+        </h2>
+
+        <div class="space-y-12">
+          <!-- Subsection 5a -->
+          <div class="space-y-4">
+            <h3 class="text-xl font-extrabold">Install</h3>
+            <div class="flex flex-col rounded-lg overflow-hidden border border-brand/30">
+              <div class="bg-[#1e1616] border-b border-brand/20 px-4 py-3 flex items-center justify-between">
+                <div class="flex gap-1.5">
+                  <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
+                  <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
+                  <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
+                </div>
+                <span class="text-xs font-mono font-bold opacity-60 text-cream">Terminal</span>
+              </div>
+              <div class="bg-darkbrown p-5 font-mono text-xs text-cream overflow-x-auto relative min-h-[80px] flex items-center">
+                <pre class="w-full"><code id="code-full-install" class="whitespace-pre-wrap">npm install @shellxyz/sdk</code></pre>
+                <button onclick="copyToClipboard('code-full-install', this)" class="absolute top-3 right-3 text-cream/70 hover:text-cream bg-white/5 hover:bg-white/10 p-1.5 rounded transition-colors" title="Copy Code">
+                  <i data-lucide="copy" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subsection 5b -->
+          <div class="space-y-4">
+            <h3 class="text-xl font-extrabold">Initialize inside your wallet client</h3>
+            <div class="flex flex-col rounded-lg overflow-hidden border border-brand/30">
+              <div class="bg-[#1e1616] border-b border-brand/20 px-4 py-3 flex items-center justify-between">
+                <div class="flex gap-1.5">
+                  <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
+                  <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
+                  <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
+                </div>
+                <span class="text-xs font-mono font-bold opacity-60 text-cream">setup.ts</span>
+              </div>
+              <div class="bg-darkbrown p-5 font-mono text-xs text-cream overflow-x-auto relative">
+                <pre class="w-full"><code id="code-full-init" class="whitespace-pre">import ShellSDK from '@shellxyz/sdk'
+
+ShellSDK.init({
+  contactList: walletClient.getSavedAddresses(),
+  solThreshold: 10
+})</code></pre>
+                <button onclick="copyToClipboard('code-full-init', this)" class="absolute top-3 right-3 text-cream/70 hover:text-cream bg-white/5 hover:bg-white/10 p-1.5 rounded transition-colors" title="Copy Code">
+                  <i data-lucide="copy" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subsection 5c -->
+          <div class="space-y-4">
+            <h3 class="text-xl font-extrabold">Intercept transactions before signing</h3>
+            <div class="flex flex-col rounded-lg overflow-hidden border border-brand/30">
+              <div class="bg-[#1e1616] border-b border-brand/20 px-4 py-3 flex items-center justify-between">
+                <div class="flex gap-1.5">
+                  <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
+                  <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
+                  <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
+                </div>
+                <span class="text-xs font-mono font-bold opacity-60 text-cream">interceptor.ts</span>
+              </div>
+              <div class="bg-darkbrown p-5 font-mono text-xs text-cream overflow-x-auto relative">
+                <pre class="w-full"><code id="code-full-intercept" class="whitespace-pre">async function onTransactionRequest(tx) {
+  const result = await ShellSDK.analyzeTransaction({
+    address: tx.destination,
+    transferAmount: tx.amount,
+    transactionType: tx.type
+  })
+
+  if (result.blocked) return wallet.reject(result.reason)
+  if (result.requiresPIN) return wallet.triggerPIN()
+  return wallet.proceedToSign(tx)
+}</code></pre>
+                <button onclick="copyToClipboard('code-full-intercept', this)" class="absolute top-3 right-3 text-cream/70 hover:text-cream bg-white/5 hover:bg-white/10 p-1.5 rounded transition-colors" title="Copy Code">
+                  <i data-lucide="copy" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subsection 5d -->
+          <div class="space-y-4">
+            <h3 class="text-xl font-extrabold">Deep decode — read what the transaction actually does</h3>
+            <div class="flex flex-col rounded-lg overflow-hidden border border-brand/30">
+              <div class="bg-[#1e1616] border-b border-brand/20 px-4 py-3 flex items-center justify-between">
+                <div class="flex gap-1.5">
+                  <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
+                  <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
+                  <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
+                </div>
+                <span class="text-xs font-mono font-bold opacity-60 text-cream">decoder.ts</span>
+              </div>
+              <div class="bg-darkbrown p-5 font-mono text-xs text-cream overflow-x-auto relative">
+                <pre class="w-full"><code id="code-full-decode" class="whitespace-pre">const decoded = await ShellSDK.decodeAndAnalyze({
+  serializedTransaction: tx.serialized,
+  encoding: 'base64',
+  transferAmount: tx.amount,
+  contactList: wallet.contacts
+})
+
+if (decoded.containsUnknownPrograms) {
+  wallet.showWarning(decoded.warning)
+}</code></pre>
+                <button onclick="copyToClipboard('code-full-decode', this)" class="absolute top-3 right-3 text-cream/70 hover:text-cream bg-white/5 hover:bg-white/10 p-1.5 rounded transition-colors" title="Copy Code">
+                  <i data-lucide="copy" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subsection 5e -->
+          <div class="space-y-4">
+            <h3 class="text-xl font-extrabold">Away Mode — block background signing</h3>
+            <div class="flex flex-col rounded-lg overflow-hidden border border-brand/30">
+              <div class="bg-[#1e1616] border-b border-brand/20 px-4 py-3 flex items-center justify-between">
+                <div class="flex gap-1.5">
+                  <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
+                  <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
+                  <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
+                </div>
+                <span class="text-xs font-mono font-bold opacity-60 text-cream">awayMode.ts</span>
+              </div>
+              <div class="bg-darkbrown p-5 font-mono text-xs text-cream overflow-x-auto relative">
+                <pre class="w-full"><code id="code-full-away" class="whitespace-pre">// User locks their screen or goes idle
+ShellSDK.setAwayMode(true)
+
+// Any background signing attempt is blocked instantly
+// Re-enable when user returns
+ShellSDK.setAwayMode(false)</code></pre>
+                <button onclick="copyToClipboard('code-full-away', this)" class="absolute top-3 right-3 text-cream/70 hover:text-cream bg-white/5 hover:bg-white/10 p-1.5 rounded transition-colors" title="Copy Code">
+                  <i data-lucide="copy" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
 
   </main>
-
-  <!-- FOOTER -->
-  <footer class="border-t border-brand py-10 w-full px-6 md:px-12 bg-cream flex flex-col sm:flex-row justify-between items-center gap-4 text-sm font-semibold">
-    <span>Shell by @0xileri</span>
-    <a href="https://github.com/zarkbns/shell" target="_blank" rel="noopener noreferrer" class="hover:underline flex items-center gap-1.5">
-      <i data-lucide="github" class="w-4.5 h-4.5"></i> GitHub
-    </a>
-  </footer>
 
   <!-- SCRIPTS -->
   <script>

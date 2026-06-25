@@ -1,5 +1,6 @@
 {
   "name": "Shell",
-  "description": "SDK program used to safeguard wallets built on Solana"
- ":majorCapabilitiesbilities": ["MAJOR_CAPABILITY_SERVER_SIDE_API"]
+  "description": "Simple, bulletproof background protection for Solana wallets. Zero jargon, automatic safety blocks, and instant offline locks.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
