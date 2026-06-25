@@ -1,5 +1,5 @@
 {
-  "name": "shell-sdk",
+  "name": "@shellxyz/sdk",
   "version": "0.1.0",
   "description": "Modular transaction security SDK for Solana wallets",
   "license": "MIT",
