@@ -122,6 +122,17 @@ export default function App() {
   const [pinError, setPinError] = useState('');
   const [customExplanation, setCustomExplanation] = useState('');
 
+  // --- Scenario Result Area States ---
+  const [scenarioLoading, setScenarioLoading] = useState<boolean>(false);
+  const [scenarioResult, setScenarioResult] = useState<{
+    blocked: boolean;
+    requiresPIN: boolean;
+    riskScore: number;
+    reason: string;
+    indicators: string[];
+  } | null>(null);
+  const [scenarioError, setScenarioError] = useState<string>('');
+
   // --- Trusted Contact List ---
   const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>([
     { id: '1', name: 'Alice (Sister)', addressLabel: 'Verified Wallet •••• 7R8S' },
@@ -179,11 +190,15 @@ export default function App() {
     setPipelineState('checking');
     setPinError('');
     setEnteredPin('');
+    setScenarioLoading(true);
+    setScenarioResult(null);
+    setScenarioError('');
 
     try {
       // 1. If shield is turned off completely
       if (!isShieldActive) {
         approveTransaction('Protection disabled. Signature dispatched unprotected.');
+        setScenarioLoading(false);
         return;
       }
 
@@ -226,36 +241,49 @@ export default function App() {
 
       const data = await res.json();
       if (data.success && data.analysis) {
-        const { riskScore, category, explanation, recommendation } = data.analysis;
+        const riskScore = data.analysis.riskScore ?? 0;
+        const blocked = data.analysis.blocked ?? (activeScenarioId === 'rogue' || riskScore >= 85);
+        const amount = parseFloat(amountInput) || 0;
+        const isWhitelisted = activeScenarioId === 'sister' || trustedContacts.some(c => recipientInput.includes(c.name));
+        const requiresPIN = data.analysis.requiresPIN ?? (!blocked && isPinRequired && amount > transferLimit && !isWhitelisted);
 
-        // If riskScore >= 85, block transaction
-        if (riskScore >= 85) {
+        // Update the visible results area state
+        setScenarioResult({
+          blocked,
+          requiresPIN,
+          riskScore,
+          reason: data.analysis.explanation || data.analysis.recommendation || "Analyzed successfully",
+          indicators: data.analysis.indicators || []
+        });
+
+        // If blocked, block transaction
+        if (blocked) {
           blockTransaction(
-            category || 'Blocked: Threat Detected',
-            explanation || 'Risk assessment limit exceeded. Transaction aborted.'
+            data.analysis.category || 'Blocked: Threat Detected',
+            data.analysis.explanation || 'Risk assessment limit exceeded. Transaction aborted.'
           );
         } else {
-          // Check if PIN is required for high-value transfer (e.g. amount > 10 SOL and riskScore > 20)
-          const amount = parseFloat(amountInput) || 0;
-          const isWhitelisted = activeScenarioId === 'sister' || trustedContacts.some(c => recipientInput.includes(c.name));
-
-          if (isPinRequired && amount > transferLimit && !isWhitelisted) {
+          if (requiresPIN) {
             setPipelineState('pin-required');
             setCustomExplanation(`This transfer of ${amount} SOL exceeds the configured single-transaction limit of ${transferLimit} SOL to unverified addresses. Physical PIN authentication required.`);
           } else {
             approveTransaction(
               isWhitelisted 
                 ? 'Safe transaction: Recipient is a trusted verified contact. Intercept cleared.'
-                : explanation || 'Verified Safe Transfer completed successfully.'
+                : data.analysis.explanation || 'Verified Safe Transfer completed successfully.'
             );
           }
         }
       } else {
         throw new Error("Invalid response format");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("API error during security check:", err);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setScenarioError(errMsg);
       blockTransaction('Scanning Error', 'Failed to communicate with Shell SDK backend protector.');
+    } finally {
+      setScenarioLoading(false);
     }
   };
 
@@ -294,7 +322,132 @@ export default function App() {
     setLogs(prev => [newLog, ...prev]);
   };
 
-  // Apply scenario payload to form
+  // Run a complete automatic analysis on clicking a scenario button
+  const handleScenarioClick = async (sc: SandboxScenario) => {
+    setActiveScenarioId(sc.id);
+    setRecipientInput(sc.recipient);
+    setAmountInput(sc.amount);
+    setTxNote(sc.memo);
+    
+    setScenarioLoading(true);
+    setScenarioResult(null);
+    setScenarioError('');
+    setPipelineState('checking');
+
+    try {
+      // 1. Sync Away Mode first
+      if (sc.id === 'rogue') {
+        try {
+          await fetch("/api/away-mode/activate");
+          setIsAwayModeActive(true);
+        } catch (err) {
+          console.error("Failed to activate away mode for rogue scenario:", err);
+        }
+      } else {
+        try {
+          await fetch("/api/away-mode/deactivate");
+          setIsAwayModeActive(false);
+        } catch (err) {
+          console.error("Failed to deactivate away mode:", err);
+        }
+      }
+
+      // 2. Prepare contact list based on scenario
+      let contactList: string[] = [];
+      if (sc.id === 'mimic') {
+        contactList = ["AliC3...xK9z"];
+      } else if (sc.id === 'sister') {
+        contactList = ["AliceSisterVerifiedWallet7R8S"];
+      } else {
+        contactList = trustedContacts.map(c => c.name);
+      }
+
+      // 3. Make absolute fetch call
+      const res = await fetch("/api/analyze-address", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          address: sc.recipient,
+          transferAmount: parseFloat(sc.amount) || 0,
+          transactionType: sc.memo || "Direct Transfer",
+          contactList
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to contact the backend analyzer.");
+      }
+
+      const data = await res.json();
+      if (data.success && data.analysis) {
+        const riskScore = data.analysis.riskScore ?? 0;
+        const blocked = data.analysis.blocked ?? (sc.id === 'rogue' || riskScore >= 85);
+        const amount = parseFloat(sc.amount) || 0;
+        const isWhitelisted = sc.id === 'sister' || trustedContacts.some(c => sc.recipient.includes(c.name));
+        const requiresPIN = data.analysis.requiresPIN ?? (!blocked && isPinRequired && amount > transferLimit && !isWhitelisted);
+
+        setScenarioResult({
+          blocked,
+          requiresPIN,
+          riskScore,
+          reason: data.analysis.explanation || data.analysis.recommendation || "Analyzed successfully",
+          indicators: data.analysis.indicators || []
+        });
+
+        // Also update the main pipelineState and log outcomes
+        if (blocked) {
+          setPipelineState('blocked');
+          setCustomExplanation(data.analysis.explanation || 'Risk assessment limit exceeded. Transaction aborted.');
+          const newLog: SimplifiedLog = {
+            id: `log-${Date.now()}`,
+            timestamp: 'Just now',
+            title: data.analysis.category || 'Blocked: Threat Detected',
+            destination: sc.recipient,
+            amount: `${sc.amount} SOL`,
+            status: 'Blocked by Shell',
+            explanation: data.analysis.explanation || 'Away Mode is active'
+          };
+          setLogs(prev => [newLog, ...prev]);
+        } else if (requiresPIN) {
+          setPipelineState('pin-required');
+          setCustomExplanation(`This transfer of ${sc.amount} SOL exceeds the configured single-transaction limit of ${transferLimit} SOL to unverified addresses. Physical PIN authentication required.`);
+        } else {
+          setPipelineState('approved');
+          const finalExplanation = isWhitelisted 
+            ? 'Safe transaction: Recipient is a trusted verified contact. Intercept cleared.'
+            : data.analysis.explanation || 'Verified Safe Transfer completed successfully.';
+          setCustomExplanation(finalExplanation);
+          
+          const cost = parseFloat(sc.amount) || 0;
+          setBalance(prev => Math.max(0, prev - cost));
+
+          const newLog: SimplifiedLog = {
+            id: `log-${Date.now()}`,
+            timestamp: 'Just now',
+            title: 'Safe & Approved',
+            destination: sc.recipient,
+            amount: `${sc.amount} SOL`,
+            status: 'Safe & Approved',
+            explanation: finalExplanation
+          };
+          setLogs(prev => [newLog, ...prev]);
+        }
+      } else {
+        throw new Error("Invalid response format from server");
+      }
+    } catch (err: any) {
+      console.error("Scenario click error:", err);
+      setScenarioError(err instanceof Error ? err.message : String(err));
+      setPipelineState('blocked');
+      setCustomExplanation('Failed to communicate with Shell SDK backend protector.');
+    } finally {
+      setScenarioLoading(false);
+    }
+  };
+
+  // Apply scenario payload to form (keeps for compatibility if needed elsewhere)
   const applyScenario = (sc: SandboxScenario) => {
     setActiveScenarioId(sc.id);
     setRecipientInput(sc.recipient);
@@ -521,7 +674,7 @@ export default function App() {
               return (
                 <button
                   key={sc.id}
-                  onClick={() => applyScenario(sc)}
+                  onClick={() => handleScenarioClick(sc)}
                   className={`text-left p-4 rounded-xl border transition-all flex flex-col justify-between group ${
                     isSelected
                       ? 'bg-[#1C1817] border-[#4289CB] shadow-lg shadow-[#4289CB]/10'
@@ -559,6 +712,110 @@ export default function App() {
               );
             })}
           </div>
+
+          {/* --- SCENARIO ANALYSIS RESULT AREA --- */}
+          {(scenarioLoading || scenarioResult || scenarioError) && (
+            <div id="scenario-result-area" className="mt-6 pt-6 border-t border-[#3A3230]">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#EEE5BC] mb-3 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#4289CB]" />
+                Scenario Evaluation Result
+              </h3>
+
+              {scenarioLoading && (
+                <div className="flex items-center gap-3 p-4 bg-[#1C1817] border border-[#2A2422] rounded-xl text-slate-400">
+                  <RefreshCw className="w-5 h-5 animate-spin text-[#4289CB]" />
+                  <span className="text-sm font-medium">Analyzing transaction...</span>
+                </div>
+              )}
+
+              {scenarioError && (
+                <div className="p-4 bg-rose-950/20 border border-rose-500/30 rounded-xl text-rose-400 text-sm flex flex-col gap-3">
+                  <span>{scenarioError}</span>
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => {
+                        setScenarioResult(null);
+                        setScenarioLoading(false);
+                        setScenarioError('');
+                        handleReset();
+                      }}
+                      className="px-4 py-2 bg-slate-950 hover:bg-slate-900 border border-[#2A2422] text-slate-300 hover:text-white rounded-lg text-xs font-bold transition-all"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {scenarioResult && !scenarioLoading && (
+                <div className="flex flex-col gap-4">
+                  {/* Status Banner */}
+                  {scenarioResult.blocked ? (
+                    <div className="bg-red-600 text-white font-black text-center py-3 rounded-xl tracking-wider text-sm shadow-md animate-fade-in" id="status-banner-blocked">
+                      TRANSACTION BLOCKED
+                    </div>
+                  ) : scenarioResult.requiresPIN ? (
+                    <div className="bg-amber-500 text-slate-950 font-black text-center py-3 rounded-xl tracking-wider text-sm shadow-md animate-fade-in" id="status-banner-pin">
+                      PIN REQUIRED
+                    </div>
+                  ) : (
+                    <div className="bg-emerald-500 text-white font-black text-center py-3 rounded-xl tracking-wider text-sm shadow-md animate-fade-in" id="status-banner-cleared">
+                      TRANSACTION CLEARED
+                    </div>
+                  )}
+
+                  {/* Analysis details */}
+                  <div className="bg-[#1C1817] border border-[#2A2422] rounded-xl p-4 flex flex-col gap-2">
+                    <div className="flex items-center justify-between border-b border-[#2A2422]/60 pb-2">
+                      <span className="text-xs text-slate-400 font-medium">Risk Score:</span>
+                      <span className={`font-mono text-xs font-bold ${
+                        scenarioResult.riskScore >= 85 ? 'text-red-400' : scenarioResult.riskScore > 20 ? 'text-amber-400' : 'text-emerald-400'
+                      }`}>
+                        {scenarioResult.riskScore}/100
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col gap-1 py-1">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Reason:</span>
+                      <p className="text-xs text-slate-300 leading-relaxed">
+                        {scenarioResult.reason}
+                      </p>
+                    </div>
+
+                    {scenarioResult.indicators && scenarioResult.indicators.length > 0 && (
+                      <div className="flex flex-col gap-1.5 pt-2 border-t border-[#2A2422]/60">
+                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Signals Detected:</span>
+                        <div className="flex flex-col gap-1">
+                          {scenarioResult.indicators.map((indicator, index) => (
+                            <div key={index} className="text-[11px] text-slate-400 flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#4289CB]" />
+                              <span>{indicator}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Reset button below the result */}
+                  <div className="mt-2 flex justify-end">
+                    <button
+                      onClick={() => {
+                        setScenarioResult(null);
+                        setScenarioLoading(false);
+                        setScenarioError('');
+                        handleReset();
+                      }}
+                      className="px-4 py-2 bg-slate-950 hover:bg-slate-900 border border-[#2A2422] text-slate-300 hover:text-white rounded-lg text-xs font-bold transition-all"
+                      id="reset-scenario-result-btn"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </section>
 
         {/* INTERACTIVE PIPELINE FLOW VISUALIZER */}

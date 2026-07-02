@@ -12,6 +12,14 @@ const PORT = 3000;
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  res.header('Access-Control-Allow-Headers', 'Content-Type')
+  if (req.method === 'OPTIONS') return res.sendStatus(200)
+  next()
+});
+
 // API Endpoint to perform safety check on receiving address
 app.post("/api/analyze-address", async (req, res) => {
   const { address, transferAmount, transactionType, contactList } = req.body;
@@ -45,6 +53,8 @@ app.post("/api/analyze-address", async (req, res) => {
   return res.json({
     success: true,
     analysis: {
+      blocked: analysisResult.blocked,
+      requiresPIN: analysisResult.requiresPIN,
       riskScore: details.riskScore,
       category: details.category,
       indicators: details.indicators,
